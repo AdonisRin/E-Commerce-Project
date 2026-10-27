@@ -1,0 +1,195 @@
+﻿@model IEnumerable<LiftAndAesthetics.Models.FitnessClass>
+
+@{
+    ViewData["Title"] = "Classes";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=2069') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(220, 53, 69, 0.8);">Group Classes</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">If you don't like lifting alone, come join our classes.</p>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="mt-4">
+            <a asp-action="Create" class="btn btn-liquid font-bebas fs-3 px-4 py-2" style="letter-spacing: 2px;"> Add New Class</a>
+        </div>
+    }
+</div>
+
+<div class="container mt-5 mb-5">
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8 text-center">
+            <div class="search-container">
+                <span class="search-icon-overlay"></span>
+                <input type="text" id="searchClasses" class="cyber-search input-hologram font-montserrat fw-bold" style="padding-left: 45px !important;" placeholder="Search classes by name..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4" id="classesContainer">
+        @foreach (var item in Model)
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-lg overflow-hidden bg-black text-white card-cyber-glow" style="border-left: 5px solid #dc3545 !important;">
+                    <div class="row g-0 h-100">
+
+                        <div class="col-md-5 col-lg-4 position-relative d-flex align-items-center justify-content-center border-end border-secondary" style="background: #000; overflow: hidden;">
+                            <img src="@(string.IsNullOrEmpty(item.MainPhotoUrl) ? "https://via.placeholder.com/600x400/111/dc3545?text=Class" : item.MainPhotoUrl)"
+                                 class="img-fluid img-zoom-extreme w-100 h-100" style="object-fit: cover; min-height: 250px;" alt="@item.ClassName">
+
+                            <div class="position-absolute top-0 start-0 m-3">
+                                <span class="badge bg-danger shadow-lg font-bebas px-3 py-2 fs-5" style="letter-spacing: 1px;">TRAINER: @(item.Trainer != null ? item.Trainer.Name : "TBA")</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7 col-lg-8">
+                            <div class="card-body p-4 p-lg-5 d-flex flex-column h-100">
+                                <h2 class="font-bebas card-title text-crisp-white mb-3 text-hologram" style="letter-spacing: 2px; font-size: 3rem;">@item.ClassName</h2>
+
+                                <p class="font-montserrat card-text text-crisp-white opacity-75 fw-bold fs-5 flex-grow-1 mb-4">
+                                    @item.Description
+                                </p>
+
+                                <div class="d-flex flex-wrap gap-2 mb-4">
+                                    <button class="font-bebas btn btn-outline-light fs-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#img_@item.FitnessClassId"> Gallery</button>
+                                    @if (!string.IsNullOrEmpty(item.VideoUrl))
+                                    {
+                                        <a href="@item.VideoUrl" target="_blank" class="font-bebas btn btn-liquid fs-4 px-4 btn-firework">▶ Watch Video</a>
+                                    }
+
+                                    @if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+                                    {
+                                        <form asp-controller="Appointments" asp-action="Book" method="post" class="m-0 p-0" onsubmit="return confirm(' Are you sure you want to book this  fitness class  ? ');">
+                                            <input type="hidden" name="classId" value="@item.FitnessClassId" />
+                                            <button type="submit" class="font-bebas btn btn-outline-info fs-4 px-4 shadow-lg btn-firework" style="letter-spacing: 1px;"> BOOK SPOT</button>
+                                        </form>
+                                    }
+                                </div>
+
+                                <div class="collapse mb-4" id="img_@item.FitnessClassId">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <img src="@(string.IsNullOrEmpty(item.ExtraPhoto1Url) ? "https://via.placeholder.com/300/111/dc3545?text=+" : item.ExtraPhoto1Url)" class="img-fluid rounded border border-secondary" style="height: 300px; width: 100%; object-fit: cover; border-radius: 10px;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <img src="@(string.IsNullOrEmpty(item.ExtraPhoto2Url) ? "https://via.placeholder.com/300/111/dc3545?text=+" : item.ExtraPhoto2Url)" class="img-fluid rounded border border-secondary" style="height: 300px; width: 100%; object-fit: cover; border-radius: 10px;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-auto pt-3 border-top border-secondary d-flex justify-content-end gap-2">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.FitnessClassId" class="font-bebas btn btn-outline-warning fs-4 px-4">Edit</a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.FitnessClassId" class="font-bebas btn btn-outline-light fs-4 px-4">Details</a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.FitnessClassId" class="font-bebas btn btn-outline-danger fs-4 px-4">Delete</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var isAuthenticated = '@(User.Identity != null && User.Identity.IsAuthenticated)' === 'True';
+            var isAdmin = '@User.IsInRole("Admin")' === 'True';
+            var antiForgeryToken = $('#antiForgeryForm input[name="__RequestVerificationToken"]').val();
+
+            $("#searchClasses").on("keyup", function () {
+                var searchQuery = $(this).val();
+
+                $.ajax({
+                    url: '/FitnessClasses/Search',
+                    type: 'GET',
+                    data: { query: searchQuery },
+                    success: function (data) {
+                        var container = $("#classesContainer");
+                        container.empty();
+
+                        if (data.length === 0) {
+                            container.append('<div class="col-12 text-center alert alert-dark bg-black text-neon-red border-danger font-bebas fs-2 shadow-lg p-5">No classes found.</div>');
+                        } else {
+                            $.each(data, function (index, item) {
+                                var mainImg = item.mainPhotoUrl ? item.mainPhotoUrl : "https://via.placeholder.com/600x400/111/dc3545?text=Class";
+                                var exImg1 = item.extraPhoto1Url ? item.extraPhoto1Url : "https://via.placeholder.com/300/111/dc3545?text=+";
+                                var exImg2 = item.extraPhoto2Url ? item.extraPhoto2Url : "https://via.placeholder.com/300/111/dc3545?text=+";
+                                var trainerName = item.trainer ? item.trainer.name : "TBA";
+
+                                var videoBtn = item.videoUrl ? `<a href="${item.videoUrl}" target="_blank" class="font-bebas btn btn-liquid fs-4 px-4 btn-firework">▶ Watch Video</a>` : "";
+
+                                var bookForm = "";
+                                if (isAuthenticated && !isAdmin) {
+                                    bookForm = `
+                                        <form action="/Appointments/Book" method="post" class="m-0 p-0" onsubmit="return confirm('Booking this will replace your current class (if you have one). Are you sure?');">
+                                            <input type="hidden" name="__RequestVerificationToken" value="${antiForgeryToken}" />
+                                            <input type="hidden" name="classId" value="${item.fitnessClassId}" />
+                                            <button type="submit" class="font-bebas btn btn-outline-info fs-4 px-4 shadow-lg btn-firework" style="letter-spacing: 1px;"> BOOK SPOT</button>
+                                        </form>
+                                    `;
+                                }
+
+                                var actionBtns = isAdmin ?
+                                    `<a href="/FitnessClasses/Edit/${item.fitnessClassId}" class="font-bebas btn btn-outline-warning fs-4 px-4">Edit</a>
+                                     <a href="/FitnessClasses/Details/${item.fitnessClassId}" class="font-bebas btn btn-outline-light fs-4 px-4">Details</a>
+                                     <a href="/FitnessClasses/Delete/${item.fitnessClassId}" class="font-bebas btn btn-outline-danger fs-4 px-4">Delete</a>` :
+                                    `<a href="/FitnessClasses/Details/${item.fitnessClassId}" class="font-bebas btn btn-outline-light fs-4 px-4">Details</a>`;
+
+                                var card = `
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-lg overflow-hidden bg-black text-white card-cyber-glow" style="border-left: 5px solid #dc3545 !important;">
+                                            <div class="row g-0 h-100">
+                                                <div class="col-md-5 col-lg-4 position-relative d-flex align-items-center justify-content-center border-end border-secondary" style="background: #000; overflow: hidden;">
+                                                    <img src="${mainImg}" class="img-fluid img-zoom-extreme w-100 h-100" style="object-fit: cover; min-height: 250px;" alt="${item.className}">
+                                                    <div class="position-absolute top-0 start-0 m-3">
+                                                        <span class="badge bg-danger shadow-lg font-bebas px-3 py-2 fs-5" style="letter-spacing: 1px;">TRAINER: ${trainerName}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7 col-lg-8">
+                                                    <div class="card-body p-4 p-lg-5 d-flex flex-column h-100">
+                                                        <h2 class="font-bebas card-title text-crisp-white mb-3 text-hologram" style="letter-spacing: 2px; font-size: 3rem;">${item.className}</h2>
+                                                        <p class="font-montserrat card-text text-crisp-white opacity-75 fw-bold fs-5 flex-grow-1 mb-4">${item.description}</p>
+
+                                                        <div class="d-flex flex-wrap gap-2 mb-4">
+                                                            <button class="font-bebas btn btn-outline-light fs-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#img_${item.fitnessClassId}"> Gallery</button>
+                                                            ${videoBtn}
+                                                            ${bookForm}
+                                                        </div>
+
+                                                        <div class="collapse mb-4" id="img_${item.fitnessClassId}">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-6"><img src="${exImg1}" class="img-fluid rounded border border-secondary" style="height: 300px; width: 100%; object-fit: cover; border-radius: 10px;"></div>
+                                                                <div class="col-md-6"><img src="${exImg2}" class="img-fluid rounded border border-secondary" style="height: 300px; width: 100%; object-fit: cover; border-radius: 10px;"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mt-auto pt-3 border-top border-secondary d-flex justify-content-end gap-2">
+                                                            ${actionBtns}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                container.append(card);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

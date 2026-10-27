@@ -1,0 +1,37 @@
+﻿@model LiftAndAesthetics.Models.FitnessClass
+
+@{
+    ViewData["Title"] = "Delete Class";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card-cyber-glow bg-black text-center p-4 p-md-5" style="border: 1px solid #333 !important; border-top: 5px solid #dc3545 !important;">
+
+                <h1 class="display-1 text-danger mb-3 glitch-text"></h1>
+                <h2 class="font-bebas fw-bold text-neon-red text-uppercase text-hologram" style="letter-spacing: 2px; font-size: 3rem;">Delete Class?</h2>
+                <p class="font-montserrat lead text-crisp-white opacity-75 mb-4">Are you sure you want to permanently delete <strong class="text-white">@Model.ClassName</strong>?</p>
+
+                <div class="overflow-hidden rounded mb-4" style="border: 2px solid #dc3545;">
+                    <img src="@(string.IsNullOrEmpty(Model.MainPhotoUrl) ? "https://via.placeholder.com/600x400/111/dc3545?text=Class+Image" : Model.MainPhotoUrl)"
+                         class="img-fluid w-100 img-zoom-extreme" style="height: 250px; object-fit: cover;" alt="@Model.ClassName">
+                </div>
+
+                <div class="bg-dark p-3 rounded text-start mb-4 border border-secondary font-montserrat">
+                    <p class="mb-2 text-crisp-white"><strong class="text-neon-red">Schedule:</strong> @Model.ScheduleTime.ToString("g")</p>
+                    <p class="mb-0 text-crisp-white"><strong class="text-neon-red">Trainer:</strong> @(Model.Trainer != null ? Model.Trainer.Name : "N/A")</p>
+                </div>
+
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="FitnessClassId" />
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="font-bebas btn btn-danger fs-3 flex-grow-1 py-2 btn-firework" style="letter-spacing: 2px;">Yes, Delete It</button>
+                        <a asp-action="Index" class="font-bebas btn btn-outline-light fs-3 px-4 py-2">Cancel</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
