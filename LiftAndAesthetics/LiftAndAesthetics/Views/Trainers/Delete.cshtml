@@ -1,0 +1,32 @@
+﻿@model LiftAndAesthetics.Models.Trainer
+
+@{
+    ViewData["Title"] = "Delete Trainer";
+}
+
+<div class="container mt-5 mb-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="p-5 rounded-4 shadow-lg text-center card-cyber-glow" style="background: #0a0a0a; border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <h1 class="display-1 text-danger mb-3 glitch-text"></h1>
+                <h2 class="font-bebas fw-bold text-neon-red text-uppercase text-hologram" style="letter-spacing: 2px; font-size: 3rem;">Delete Trainer?</h2>
+                <p class="font-montserrat lead text-crisp-white opacity-75 mb-4">Are you sure you want to permanently remove <strong class="text-white">@Model.Name</strong>?</p>
+
+                <div class="bg-dark p-3 rounded text-start mb-4 border border-secondary font-montserrat">
+                    <p class="mb-2 text-crisp-white"><strong class="text-neon-red">Specialization:</strong> @Model.Specialization</p>
+                    <p class="mb-0 text-crisp-white"><strong class="text-neon-red">Phone:</strong> @(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "N/A" : Model.PhoneNumber)</p>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <form asp-action="Delete" class="flex-grow-1">
+                        <input type="hidden" asp-for="TrainerId" />
+                        <button type="submit" class="font-bebas btn btn-danger fs-3 w-100 py-2 btn-firework" style="letter-spacing: 2px;">Yes, Delete</button>
+                    </form>
+                    <a asp-action="Index" class="font-bebas btn btn-outline-light fs-3 px-4 py-2">Cancel</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
