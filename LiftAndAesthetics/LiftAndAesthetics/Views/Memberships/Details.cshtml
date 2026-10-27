@@ -1,0 +1,53 @@
+﻿@model LiftAndAesthetics.Models.Membership
+
+@{
+    ViewData["Title"] = "Plan Details";
+}
+
+<div class="container mt-5 mb-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-5 rounded-4 shadow-lg text-center position-relative card-cyber-glow" style="background: #0a0a0a; border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <div class="position-absolute top-0 start-50 translate-middle">
+                    <span class="badge bg-danger border border-dark rounded-pill px-4 py-2 fs-5 font-bebas shadow-sm" style="letter-spacing: 1px;">PLAN PREVIEW</span>
+                </div>
+
+                <h1 class="font-bebas text-crisp-white text-uppercase mt-3 mb-1 text-hologram" style="font-size: 4.5rem; letter-spacing: 3px;">@Model.Name</h1>
+                <h2 class="font-bebas text-neon-red mb-4 text-hologram" style="font-size: 3.5rem; letter-spacing: 2px;">@Model.Price <span class="fs-3 text-secondary">LEI / MO</span></h2>
+
+                <div class="bg-dark p-4 rounded-4 border border-secondary text-start mb-5 mx-auto" style="max-width: 500px;">
+                    <p class="font-montserrat fst-italic text-center text-crisp-white opacity-75 fs-5 mb-4 px-3">"@Model.Description"</p>
+                    <hr class="border-secondary mb-4" />
+
+                    <h5 class="font-bebas text-neon-red mb-3 fs-4" style="letter-spacing: 1px;">Features Included:</h5>
+                    <ul class="list-unstyled font-montserrat text-crisp-white ps-2">
+                        @if (!string.IsNullOrEmpty(Model.Features))
+                        {
+                            foreach (var feature in Model.Features.Split(','))
+                            {
+                                <li class="mb-3">
+                                    <span class="text-neon-red fw-bolder me-2 fs-5"></span>
+                                    <span class="fw-bold">@feature.Trim()</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="text-muted fst-italic">No specific features listed.</li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="/Memberships/Edit/@Model.MembershipId" class="font-bebas btn btn-warning fs-4 px-5 text-dark">Edit Plan</a>
+                    }
+                    <a href="/Memberships" class="font-bebas btn btn-outline-light fs-4 px-5">Back to List</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
