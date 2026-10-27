@@ -1,0 +1,77 @@
+@* CHAT INBOX DISABLED FOR DEMO
+@model IEnumerable<string>
+
+@{
+    ViewData["Title"] = "Admin - Support Inbox";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); border-bottom: 3px solid #ffc107;">
+    <h1 class="font-bebas display-2 text-uppercase text-warning glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);"> SUPPORT INBOX</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Manage athlete support requests.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="card-cyber-glow bg-black p-4 p-md-5" style="border: 1px solid #333; border-top: 5px solid #ffc107; border-radius: 15px;">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 pb-3 border-bottom border-secondary">
+            <h3 class="font-bebas text-white mb-0" style="letter-spacing: 2px;">Active Conversations</h3>
+
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="/Reviews" class="font-bebas btn btn-outline-info fs-5 px-4 shadow-lg btn-firework" style="letter-spacing: 1px;">
+                    CHECK REVIEWS
+                </a>
+                <a href="/ContactMessages" class="font-bebas btn btn-outline-warning fs-5 px-4 shadow-lg btn-firework" style="letter-spacing: 1px;">
+                    GUEST MESSAGES
+                </a>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center p-5 rounded-4 shadow-sm" style="background: rgba(255, 193, 7, 0.05); border: 1px dashed rgba(255, 193, 7, 0.5);">
+                <h1 class="display-1 text-warning mb-3" style="opacity: 0.8;"></h1>
+                <h3 class="font-bebas text-white" style="letter-spacing: 2px;">NO MESSAGES YET</h3>
+                <p class="font-montserrat text-secondary fw-bold">Athletes haven't asked for support recently.</p>
+            </div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var userEmail in Model)
+                {
+                    <div class="list-group-item bg-dark border-secondary text-white mb-2 rounded shadow-sm d-flex justify-content-between align-items-center p-3 custom-hover-item" style="transition: all 0.3s ease;">
+
+                        <a href="/Chat?userEmail=@userEmail" class="d-flex align-items-center gap-3 text-decoration-none flex-grow-1">
+                            <div class="rounded-circle overflow-hidden border border-warning" style="width: 50px; height: 50px;">
+                                <img src="https://ui-avatars.com/api/?name=@userEmail&background=ffc107&color=000&bold=true" class="w-100 h-100 object-fit-cover" />
+                            </div>
+                            <div>
+                                <h5 class="font-bebas text-warning mb-0" style="letter-spacing: 1px; font-size: 1.5rem;">@userEmail</h5>
+                                <small class="font-montserrat text-secondary">Click here to open chat window</small>
+                            </div>
+                        </a>
+
+                        <div class="d-flex align-items-center gap-2 z-1">
+                            <a href="/Chat?userEmail=@userEmail" class="btn btn-sm btn-outline-light font-bebas px-3">OPEN CHAT </a>
+
+                            <form asp-controller="Chat" asp-action="DeleteConversation" method="post" class="m-0 p-0" onsubmit="return confirm('Wipe entire chat history with @userEmail? This cannot be undone!');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userEmail" value="@userEmail" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger font-bebas px-3">DELETE </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .custom-hover-item:hover {
+        transform: translateX(10px);
+        background-color: #111 !important;
+        border-color: #ffc107 !important;
+    }
+</style>
+*@

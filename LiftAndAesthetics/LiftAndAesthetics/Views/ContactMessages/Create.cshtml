@@ -1,0 +1,286 @@
+@model LiftAndAesthetics.Models.ContactMessage
+
+@{
+    ViewData["Title"] = "Contact";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-1 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 5px; text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);">Get in Touch</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 2px;">Got a question? We're here for you.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row g-5">
+
+        <div class="col-md-6 mb-4">
+
+            @* Live Chat support commented out for demo
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <div class="p-4 p-md-5 rounded-4 shadow-lg card-cyber-glow h-100 d-flex flex-column justify-content-center align-items-center text-center" style="background: linear-gradient(145deg, #111 0%, #05101a 100%); border: 1px solid #333; border-top: 5px solid #0dcaf0;">
+                    <h2 class="font-bebas text-info mb-4 text-hologram" style="letter-spacing: 2px; font-size: 3.5rem;"> CHAT SUPPORT</h2>
+
+                    <img src="~/photos/mail.png" class="img-fluid rounded-circle mb-4 opacity-75" style="max-width: 120px; filter: hue-rotate(180deg);" alt="Chat">
+
+                    <p class="font-montserrat fs-5 text-crisp-white mb-4">Talk to us directly on our Real-Time Support Chat.</p>
+
+                    <a href="/Chat" class="font-bebas btn btn-outline-info fs-2 w-100 py-3 shadow-lg btn-firework" style="letter-spacing: 2px;">
+                        OPEN LIVE CHAT
+                    </a>
+                </div>
+            }
+            else
+            *@
+            <div id="formWrapper">
+                <div id="successMessageDiv" class="d-none text-center p-5 text-white rounded-4 shadow-lg card-cyber-glow" style="background: #0a0a0a; border: 1px solid #333; border-top: 5px solid #198754; animation: fadeIn 0.5s ease-out;">
+                    <img src="~/photos/mail.png" class="img-fluid rounded-circle mb-4" style="max-width: 150px; border: 4px solid #198754; box-shadow: 0 0 25px rgba(25, 135, 84, 0.4);" alt="Mail">
+                    <h2 class="font-bebas text-success text-hologram" style="letter-spacing: 2px; font-size: 3rem;">Message Sent!</h2>
+                    <p class="font-montserrat lead mt-3 fw-bold text-crisp-white">Thanks for reaching out, <strong id="successName" class="text-danger">Guest</strong>.</p>
+                    <p class="font-montserrat text-secondary">We've received your message and our team will get back to you at <em id="successEmail" class="text-white">your email</em> shortly.</p>
+                    <button id="btnResetForm" class="font-bebas btn btn-liquid fs-4 px-4 py-2 mt-4 w-100">Send another message</button>
+                </div>
+
+                <div id="formContainer" class="p-4 p-md-5 rounded-4 shadow-lg card-cyber-glow" style="background: linear-gradient(145deg, #111 0%, #1a0505 100%); border: 1px solid #333; border-top: 4px solid #dc3545;">
+                    <h2 class="font-bebas text-neon-red mb-4 text-hologram" style="letter-spacing: 2px; font-size: 2.5rem;">Send us a message</h2>
+                    <div id="ajaxAlert" class="alert d-none text-center fw-bold font-montserrat" role="alert"></div>
+
+                    <form id="ajaxContactForm" novalidate>
+                        <div class="mb-4">
+                            <label for="SenderName" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Your Name</label>
+                            <input id="SenderName" class="form-control input-hologram font-montserrat p-3" placeholder="Enter your name" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="SenderEmail" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Email address</label>
+                            <input id="SenderEmail" type="email" class="form-control input-hologram font-montserrat p-3" placeholder="Enter a valid email adress" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="MessageContent" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">What's up?</label>
+                            <textarea id="MessageContent" class="form-control input-hologram font-montserrat p-3" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                        </div>
+
+                        <button type="submit" id="btnSubmit" class="font-bebas btn btn-liquid fs-3 w-100 py-2" style="letter-spacing: 2px;">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h2 class="font-bebas text-white mb-4 text-hologram" style="letter-spacing: 2px; font-size: 2.5rem;">Where to find us</h2>
+
+            <a href="https://www.google.com/maps/place/Facultatea+de+Automatic%C4%83+%C8%99i+Electronic%C4%83/@@44.3087701,23.8325052,17z/data=!3m1!4b1!4m6!3m5!1s0x4752d702cd0f3173:0xb159446a3e899375!8m2!3d44.3087663!4d23.8350801!16s%2Fg%2F1hc9q7ny0?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D" target="_blank" class="font-bebas btn btn-outline-danger fs-3 w-100 py-3 mb-5 shadow-lg" style="letter-spacing: 2px;">
+                OPEN GOOGLE MAPS
+            </a>
+
+            <div class="p-4 p-md-5 rounded-4 shadow-lg card-cyber-glow h-100" style="background: linear-gradient(145deg, #111 0%, #1a0505 100%); border: 1px solid #333; border-top: 4px solid #dc3545;">
+                <h2 class="font-bebas text-neon-red mb-2 text-hologram" style="letter-spacing: 2px; font-size: 2.5rem;">BMI Calculator</h2>
+                <p class="font-montserrat small text-secondary fw-bold text-uppercase mb-4" style="letter-spacing: 1px;">Check your Body Mass Index.</p>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <input type="text" id="weight" class="form-control input-hologram font-montserrat p-3 text-center fs-5" placeholder="Weight (kg)">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="height" class="form-control input-hologram font-montserrat p-3 text-center fs-5" placeholder="Height (cm)">
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button id="calcBmiBtn" type="button" class="font-bebas btn btn-outline-light fs-4 w-100 py-2" style="letter-spacing: 2px;">Calculate & Get Advice</button>
+                    </div>
+                </div>
+
+                <div id="bmiResult" class="mt-4 font-bebas text-center text-white" style="font-size: 3rem; letter-spacing: 2px;"></div>
+                <div id="fitnessAdvice" class="alert mt-3 d-none text-start shadow-sm font-montserrat fw-bold" role="alert" style="font-size: 1.1rem;"></div>
+
+                <a href="/Shop" id="nutritionPromoBtn" class="font-bebas btn btn-success fs-3 w-100 mt-3 d-none shadow-lg" style="letter-spacing: 2px; transition: all 0.3s;">
+                    Check Shop Supplements & Gear
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            if ($("#ajaxContactForm").length > 0) {
+                $("#ajaxContactForm").submit(function (e) {
+                    e.preventDefault();
+
+                    var nameInput = $("#SenderName").val().trim();
+                    var emailInput = $("#SenderEmail").val().trim();
+                    var messageInput = $("#MessageContent").val().trim();
+                    var alertBox = $("#ajaxAlert");
+
+                    if (nameInput === "") {
+                        alertBox.removeClass("d-none alert-success").addClass("alert-danger").text("Bro, you forgot to enter your name!");
+                        return;
+                    }
+
+                    if (emailInput === "" || emailInput.indexOf("@@") === -1 || emailInput.indexOf(".") === -1) {
+                        alertBox.removeClass("d-none alert-success").addClass("alert-danger").text("That doesn't look like a real email address.");
+                        return;
+                    }
+
+                    if (messageInput === "") {
+                        alertBox.removeClass("d-none alert-success").addClass("alert-danger").text("You didn't write any message!");
+                        return;
+                    }
+
+                    $("#btnSubmit").html("Sending...").prop("disabled", true);
+                    alertBox.addClass("d-none");
+
+                    var dataToSend = {
+                        SenderName: nameInput,
+                        SenderEmail: emailInput,
+                        MessageContent: messageInput
+                    };
+
+                    $.ajax({
+                        url: '/ContactMessages/CreateAjax',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(dataToSend),
+                        success: function (response) {
+                            if(response.success) {
+                                $("#formContainer").addClass("d-none");
+                                $("#successName").text(nameInput);
+                                $("#successEmail").text(emailInput);
+                                $("#successMessageDiv").removeClass("d-none");
+                                $("#ajaxContactForm")[0].reset();
+                            } else {
+                                alertBox.removeClass("d-none alert-success").addClass("alert-danger").text(response.message);
+                            }
+                            $("#btnSubmit").html("Send Message").prop("disabled", false);
+                        },
+                        error: function () {
+                            alertBox.removeClass("d-none alert-success").addClass("alert-danger").text("Oops! Something went wrong.");
+                            $("#btnSubmit").html("Send Message").prop("disabled", false);
+                        }
+                    });
+                });
+
+                $("#btnResetForm").click(function () {
+                    $("#successMessageDiv").addClass("d-none");
+                    $("#formContainer").removeClass("d-none");
+                    $("#ajaxAlert").addClass("d-none");
+                });
+            }
+
+            document.getElementById('calcBmiBtn').addEventListener('click', function() {
+
+                let rawWeight = document.getElementById('weight').value.replace(',', '.');
+                let rawHeight = document.getElementById('height').value.replace(',', '.');
+
+                let weight = parseFloat(rawWeight);
+                let heightCm = parseFloat(rawHeight);
+
+                let resultDiv = document.getElementById('bmiResult');
+                let adviceDiv = document.getElementById('fitnessAdvice');
+                let nutritionBtn = document.getElementById('nutritionPromoBtn');
+
+                if(!weight || !heightCm || weight <= 0 || heightCm <= 0) {
+                    resultDiv.innerHTML = "<span class='text-danger' style='font-size: 2rem;'>Enter valid, positive numbers bro!</span>";
+                    adviceDiv.classList.add('d-none');
+                    nutritionBtn.classList.add('d-none');
+                    return;
+                }
+
+                if(weight > 950 || heightCm > 350) {
+                    resultDiv.innerHTML = "<span class='text-danger' style='font-size: 2rem;'>Bro, be serious! Max 950kg and 350cm.</span>";
+                    adviceDiv.classList.add('d-none');
+                    nutritionBtn.classList.add('d-none');
+                    return;
+                }
+
+                if(weight === 67 && heightCm === 67) {
+                    resultDiv.innerHTML = "<span class='text-info' style='font-size: 3rem;'>SIX SEVEN</span>";
+                    adviceDiv.innerHTML = "<strong class='text-info fs-5'>Bro...</strong><br>Stop watching TikTok and go lift!";
+                    adviceDiv.className = "alert mt-3 bg-dark text-white border border-2 border-info";
+                    adviceDiv.classList.remove('d-none');
+                    nutritionBtn.classList.add('d-none');
+                    return;
+                }
+
+                let bmi = (weight / ((heightCm/100) * (heightCm/100))).toFixed(2);
+                let status = ""; let advice = ""; let cls = "";
+
+                if (heightCm < 50) {
+                    status = " Too short";
+                    cls = "bg-dark text-white border border-2 border-warning";
+                    advice = "<strong class='text-warning fs-5'>Bro, are you for real ? </strong><br>You're shorter than a protein shaker! Enter real stats.";
+                }
+                else if (heightCm > 300) {
+                    status = "Titan Detected";
+                    cls = "bg-dark text-white border border-2 border-warning";
+                    advice = "<strong class='text-warning fs-5'>Bro how you are so tall </strong><br>Our ceilings are only 3 meters high. Watch your head!";
+                }
+                else if (weight < 20) {
+                    status = "Featherweight";
+                    cls = "bg-dark text-white border border-2 border-danger";
+                    advice = "<strong class='text-danger fs-5'>Bro... you weigh less than an empty barbell! </strong><br>Go eat a whole pizza right now.";
+                }
+                else if (weight > 900) {
+                    status = "Super Heavyweight";
+                    cls = "bg-dark text-white border border-2 border-danger";
+                    advice = "<strong class='text-danger fs-5'>Bro... how you are so big ? </strong><br>Our treadmills have a weight limit! Be serious.";
+                }
+                else if (bmi < 12) {
+                    status = "Critically Underweight";
+                    cls = "bg-dark text-white border border-2 border-danger";
+                    advice = "<strong class='text-danger fs-5'>Medical Consultation Recommended</strong><br>Seriously, seek medical attention before trying to lift.";
+                }
+                else if (bmi > 60) {
+                    status = "Critically Obese";
+                    cls = "bg-dark text-white border border-2 border-danger";
+                    advice = "<strong class='text-danger fs-5'>Medical Consultation Recommended</strong><br>We definitely can't carry you! Doctor first, gym second.";
+                }
+                else {
+                    if (bmi < 18.5) {
+                        status = "Underweight";
+                        cls = "bg-dark text-warning border-warning";
+                        advice = "<strong class='text-warning fs-5'>Goal: Muscle Gain</strong><br><span class='text-light'>Eat in a caloric surplus and lift heavy.</span>";
+                    } else if (bmi < 27) {
+                        status = "Normal";
+                        cls = "bg-dark text-success border-success";
+                        advice = "<strong class='text-success fs-5'>Goal: Maintain</strong><br><span class='text-light'>Great job! Keep the aesthetics sharp.</span>";
+                    } else if (bmi < 30) {
+                        status = "Overweight";
+                        cls = "bg-dark text-danger border-danger";
+                        advice = "<strong class='text-danger fs-5'>Goal: Fat Loss</strong><br><span class='text-light'>Slight caloric deficit and consistent lifting.</span>";
+                    } else if (bmi <= 40) {
+                        status = "Obese";
+                        cls = "bg-dark text-danger border-danger";
+                        advice = "<strong class='text-danger fs-5'>Goal: Safe Loss</strong><br><span class='text-light'>Focus on diet and low-impact cardio to protect your joints.</span>";
+                    } else {
+                        status = "Severely Obese";
+                        cls = "bg-dark text-danger border-danger";
+                        advice = "<strong class='text-danger fs-5'>Goal: Health First</strong><br><span class='text-light'>Strict diet control and light movement. You got this!</span>";
+                    }
+                }
+
+                resultDiv.innerHTML = "BMI: <span class='text-neon-red'>" + bmi + "</span> <br><span class='fs-4 text-secondary'>(" + status + ")</span>";
+                adviceDiv.innerHTML = advice;
+                adviceDiv.className = "alert mt-3 " + cls;
+                adviceDiv.classList.remove('d-none');
+
+                nutritionBtn.classList.remove('d-none');
+            });
+        });
+    </script>
+    <style>
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+}

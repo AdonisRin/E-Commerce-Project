@@ -1,0 +1,39 @@
+﻿@model LiftAndAesthetics.Models.ContactMessage
+
+@{
+    ViewData["Title"] = "Message Details";
+}
+
+<div class="container mt-5 mb-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-5 rounded-4 shadow-lg text-center position-relative card-cyber-glow" style="background: #0a0a0a; border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <div class="position-absolute top-0 start-50 translate-middle">
+                    <span class="badge bg-danger border border-dark rounded-pill px-4 py-2 fs-5 font-bebas shadow-sm" style="letter-spacing: 1px;">INBOX MESSAGE</span>
+                </div>
+
+                <h1 class="font-bebas text-crisp-white text-uppercase mt-4 mb-1 text-hologram" style="font-size: 3.5rem; letter-spacing: 2px;">@Model.SenderName</h1>
+                <h3 class="font-montserrat text-neon-red fw-bold mb-4">@Model.SenderEmail</h3>
+
+                <div class="bg-dark p-4 p-md-5 rounded-4 border border-secondary text-start mb-5 mx-auto">
+                    <h5 class="font-bebas text-neon-red mb-3 fs-4" style="letter-spacing: 1px;">Message Content:</h5>
+                    <p class="font-montserrat text-crisp-white fs-5 mb-4" style="white-space: pre-line; line-height: 1.6;">
+                        "@Model.MessageContent"
+                    </p>
+                    <hr class="border-secondary mb-3" />
+                    <p class="font-montserrat text-muted small fw-bold mb-0 text-end text-uppercase">
+                        Received on: @Model.SentDate.ToString("dd MMM yyyy, HH:mm")
+                    </p>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <a href="mailto:@Model.SenderEmail?subject=Reply from Lift & Aesthetics" class="font-bebas btn btn-liquid fs-3 px-5 py-2" style="letter-spacing: 1px;"> Reply via Email</a>
+                    <a asp-action="Edit" asp-route-id="@Model.ContactMessageId" class="font-bebas btn btn-warning fs-3 px-4 py-2 text-dark">Edit</a>
+                    <a asp-action="Index" class="font-bebas btn btn-outline-light fs-3 px-4 py-2">Back to Inbox</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

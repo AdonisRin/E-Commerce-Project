@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LiftAndAesthetics/LiftAndAesthetics.csproj" />
+  <Project Path="LiftAndAesthetics.Tests/LiftAndAesthetics.Tests.csproj" />
+</Solution>
