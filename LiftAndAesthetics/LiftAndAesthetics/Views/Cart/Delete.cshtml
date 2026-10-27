@@ -1,0 +1,34 @@
+﻿@model LiftAndAesthetics.Models.CartItem
+
+@{
+    ViewData["Title"] = "Remove from Cart";
+}
+
+<div class="container mt-5 mb-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="p-5 rounded-4 shadow-lg text-center card-cyber-glow" style="background: #0a0a0a; border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <h1 class="display-1 text-danger mb-3 glitch-text"></h1>
+                <h2 class="font-bebas fw-bold text-neon-red text-uppercase text-hologram" style="letter-spacing: 2px; font-size: 3rem;">Remove Item?</h2>
+                <p class="font-montserrat lead text-crisp-white opacity-75 mb-4">Are you sure you want to drop <strong class="text-white">@(Model.Product?.Name ?? "this item")</strong> from your cart?</p>
+
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="p-3 bg-white rounded-4 shadow-lg" style="width: 150px; height: 150px; border: 3px solid #dc3545;">
+                        <img src="@(string.IsNullOrEmpty(Model.Product?.ImageUrl) ? "https://via.placeholder.com/150/111/dc3545?text=Product" : Model.Product.ImageUrl)"
+                             class="img-fluid w-100 h-100 img-zoom-extreme" style="object-fit: contain;" alt="Product">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <form asp-action="Delete" class="flex-grow-1">
+                        <input type="hidden" asp-for="CartItemId" />
+                        <button type="submit" class="font-bebas btn btn-danger fs-3 w-100 py-2 btn-liquid" style="letter-spacing: 2px;">Yes, Drop It</button>
+                    </form>
+                    <a asp-action="Index" class="font-bebas btn btn-outline-light fs-3 px-4 py-2">Cancel</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
