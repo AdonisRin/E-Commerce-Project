@@ -1,0 +1,32 @@
+## .NET Core
+**/bin/
+**/obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## OS Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+## Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+## Commit Helper Scripts
+00_setup_branch.*
+commit_*.*
+run_all_9_commits.*
+run_9_commits_spaced_in_time.*
+students_config.*
+
+LiftAndAestheticsMilestone4/
+
+

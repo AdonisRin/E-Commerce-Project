@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Lift & Aesthetics - Welcome";
+    bool isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+<div id="real-app-content">
+    <section class="hero text-white text-center position-relative overflow-hidden"
+             style="background: linear-gradient(rgba(10, 12, 16, 0.88), rgba(10, 12, 16, 0.92)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop');
+                    background-size: cover; background-position: center; min-height: 80vh; display: flex; align-items: center; padding: 4rem 1rem;">
+        <div class="container position-relative z-1 py-5">
+            <h1 class="font-bebas display-1 mb-3 text-uppercase text-white" style="letter-spacing: 3px;">
+                Forge Your Legacy
+            </h1>
+            <p class="font-montserrat fs-4 mb-5 text-light w-75 mx-auto fw-bold" style="opacity: 0.9;">
+                Premium fitness essentials, expert trainers, and targeted memberships to push you past your limits.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/Memberships" class="font-bebas btn btn-danger btn-lg px-5 py-3 fs-4 shadow text-uppercase" style="letter-spacing: 2px;">
+                    Join The Club
+                </a>
+                <a href="/Shop" class="font-bebas btn btn-outline-light btn-lg px-5 py-3 fs-4 shadow text-uppercase" style="letter-spacing: 2px;">
+                    Browse Shop
+                </a>
+
+                @if (isAdmin)
+                {
+                    <a href="/Reviews" class="font-bebas btn btn-outline-info btn-lg px-5 py-3 fs-4 shadow text-uppercase" style="letter-spacing: 2px;">
+                        Check Reviews
+                    </a>
+                }
+                else if (isAuthenticated)
+                {
+                    <a href="/Reviews" class="font-bebas btn btn-outline-info btn-lg px-5 py-3 fs-4 shadow text-uppercase" style="letter-spacing: 2px;">
+                        Write / Read Reviews
+                    </a>
+                }
+                else
+                {
+                    <a href="/Reviews" class="font-bebas btn btn-outline-info btn-lg px-5 py-3 fs-4 shadow text-uppercase" style="letter-spacing: 2px;">
+                        Read Athlete Reviews
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5" style="background-color: #12151c; border-top: 2px solid #222630;">
+        <div class="container py-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark text-white border-0 shadow-sm text-center p-4" style="background-color: #1a1e27 !important; border-top: 4px solid #dc3545 !important; border-radius: 8px;">
+                        <h3 class="font-bebas card-title text-danger pt-3" style="letter-spacing: 2px; font-size: 2.2rem;">Expert Classes</h3>
+                        <p class="font-montserrat card-text text-secondary fw-semibold">Join high-intensity group classes led by certified fitness professionals.</p>
+                        <a href="/FitnessClasses" class="font-bebas btn btn-outline-danger mt-auto fs-5 text-uppercase" style="letter-spacing: 1px;">View Schedule</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark text-white border-0 shadow-sm text-center p-4" style="background-color: #1a1e27 !important; border-top: 4px solid #198754 !important; border-radius: 8px;">
+                        <h3 class="font-bebas card-title text-success pt-3" style="letter-spacing: 2px; font-size: 2.2rem;">Memberships & Pricing</h3>
+                        <p class="font-montserrat card-text text-secondary fw-semibold">Select the tier tailored to your regime with full gym, sauna, and coaching access.</p>
+                        <a href="/Memberships" class="font-bebas btn btn-outline-success mt-auto fs-5 text-uppercase" style="letter-spacing: 1px;">View Plans</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark text-white border-0 shadow-sm text-center p-4" style="background-color: #1a1e27 !important; border-top: 4px solid #ffc107 !important; border-radius: 8px;">
+                        <h3 class="font-bebas card-title text-warning pt-3" style="letter-spacing: 2px; font-size: 2.2rem;">Pro Gear & Supps</h3>
+                        <p class="font-montserrat card-text text-secondary fw-semibold">Equip yourself with premium whey isolate, pre-workouts, belts, and apparel.</p>
+                        <a href="/Shop" class="font-bebas btn btn-outline-warning mt-auto fs-5 text-uppercase" style="letter-spacing: 1px;">Visit Store</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 text-center" style="background-color: #0b0d12;">
+        <div class="container py-3">
+            <h2 class="font-bebas mb-2 text-white display-4" style="letter-spacing: 2px;">Engineered for Performance</h2>
+            <p class="font-montserrat lead text-secondary text-uppercase fw-semibold" style="letter-spacing: 1.5px; font-size: 1rem;">
+                Built for dedicated athletes, powerlifters, and gym enthusiasts.
+            </p>
+        </div>
+    </section>
+</div>
