@@ -1,0 +1,116 @@
+﻿@model LiftAndAesthetics.Models.Members
+
+@{
+    ViewData["Title"] = "Manage Subscriptions";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); border-bottom: 3px solid #0dcaf0;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(13, 202, 240, 0.5);"> Manage Subscriptions</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Admin Dashboard for <strong>@Model.Name</strong></p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <div class="card-cyber-glow bg-black p-4 p-md-5 mb-5" style="border: 1px solid #333; border-top: 5px solid #0dcaf0; border-radius: 15px;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 border-bottom border-secondary pb-3 mb-4">
+                    <div>
+                        <h2 class="font-bebas text-white text-hologram mb-0" style="font-size: 3rem; letter-spacing: 2px;">
+                            @Model.Name
+                            @if (Model.Role == "Admin")
+                            {
+                                <span class="badge bg-warning text-dark ms-2 fs-5 align-middle" style="vertical-align: text-bottom !important; letter-spacing: 1px;">STAFF</span>
+                            }
+                        </h2>
+                        <span class="font-montserrat text-secondary fw-bold fs-5">@Model.Email</span>
+                    </div>
+                    <div class="bg-dark p-3 rounded text-center border border-secondary">
+                        <span class="d-block font-montserrat text-muted fw-bold small text-uppercase" style="letter-spacing: 1px;">Current Wallet</span>
+                        <span class="font-bebas text-success fs-2">@Model.WalletBalance.ToString("0.00") LEI</span>
+                    </div>
+                </div>
+
+                <h3 class="font-bebas text-neon-red mb-3" style="letter-spacing: 2px;">Subscription Queue</h3>
+                
+                @if (Model.Role == "Admin")
+                {
+                    <div class="alert alert-dark border border-warning text-center p-5 shadow-lg">
+                        <h2 class="font-montserrat lead fw-bold text-crisp-red opacity-75" style="font-size: 2.5rem; letter-spacing: 2px;"> UNLIMITED ACCESS</h2>
+                        <p class="font-montserrat lead fw-bold text-crisp-red opacity-75 text-uppercase">This user is an Admin. They have unlimited gym access and do not require active subscriptions to enter.</p>
+                    </div>
+                }
+                else if (Model.UserMemberships == null || !Model.UserMemberships.Any())
+                {
+                    <div class="alert alert-dark border border-danger text-center p-4">
+                        <span class="font-montserrat lead fw-bold text-crisp-red opacity-75">This athlete has no active or queued plans.</span>
+                    </div>  
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0 font-montserrat">
+                            <thead class="font-bebas fs-4 text-info" style="letter-spacing: 1px;">
+                                <tr>
+                                    <th>Plan Name</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Admin Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sub in Model.UserMemberships.OrderBy(u => u.StartDate))
+                                {
+                                    bool isExpired = sub.EndDate <= DateTime.Now;
+                                    bool isQueued = sub.StartDate > DateTime.Now;
+                                    bool isActive = sub.StartDate <= DateTime.Now && sub.EndDate > DateTime.Now;
+
+                                    <tr style="border-bottom: 1px solid #222;">
+                                        <td class="fw-bold text-white fs-5">@sub.Membership?.Name</td>
+                                        <td class="text-secondary fw-bold">@sub.StartDate.ToString("dd MMM yyyy")</td>
+                                        <td class="text-secondary fw-bold">@sub.EndDate.ToString("dd MMM yyyy")</td>
+
+                                        <td>
+                                            @if (isExpired)
+                                            {
+                                                <span class="badge bg-dark border border-danger text-danger">Expired</span>
+                                            }
+                                            @if (isQueued)
+                                            {
+                                                <span class="badge bg-warning text-dark">Queued</span>
+                                            }
+                                            @if (isActive)
+                                            {
+                                                <span class="badge bg-success text-white">Active Now</span>
+                                            }
+                                        </td>
+
+                                        <td class="text-end">
+                                            @if (!isExpired)
+                                            {
+                                                <form asp-controller="Memberships" asp-action="Refund" method="post" onsubmit="return confirm('Are you sure you want to refund this plan? Money will go back to user wallet.');">
+                                                    <input type="hidden" name="userMembershipId" value="@sub.Id" />
+                                                    <button type="submit" class="font-bebas btn btn-sm btn-outline-danger fs-5 px-3 btn-firework"> Refund</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic small">No refund</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <div class="mt-4 pt-3 text-center border-top border-secondary">
+                    <a href="/Members" class="font-bebas btn btn-outline-light fs-4 px-5">Back to User List</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

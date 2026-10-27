@@ -1,0 +1,139 @@
+@model LiftAndAesthetics.Models.Members
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px;">USER PROFILE</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Update your identity and security settings.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row g-5">
+
+        <div class="col-lg-7">
+            <div class="card-cyber-glow bg-black p-4 p-md-5" style="border-top: 5px solid #0dcaf0;">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="font-bebas text-info mb-0" style="letter-spacing: 2px;">Identity & Avatar</h3>
+
+                    @if (ViewBag.BMI != null)
+                    {
+                        <span class="badge border border-info text-info font-bebas fs-5 px-3 py-2 bg-dark shadow-sm">
+                            BMI: @ViewBag.BMI
+                        </span>
+                    }
+                </div>
+
+                <form asp-action="UpdateInfo" method="post" enctype="multipart/form-data">
+                    <div class="d-flex align-items-center gap-4 mb-4 pb-4 border-bottom border-secondary">
+                        <div class="rounded-circle overflow-hidden border border-info shadow-lg" style="width: 100px; height: 100px; background-color: #111;">
+                            <img src="@(string.IsNullOrEmpty(Model.ProfilePictureUrl) ? $"https://ui-avatars.com/api/?name={Model.Name}&background=dc3545&color=fff&bold=true" : Model.ProfilePictureUrl)"
+                                 alt="Profile Avatar" class="w-100 h-100 object-fit-cover" id="avatarPreview">
+                        </div>
+                        <div class="flex-grow-1">
+                            <label class="control-label text-info">UPLOAD NEW AVATAR</label>
+                            <input type="file" name="profilePicture" class="form-control bg-dark border-secondary text-white" accept="image/*" onchange="previewImage(event)">
+                            <small class="text-secondary font-montserrat">JPG, PNG or WEBP.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="control-label">FULL NAME</label>
+                        <input type="text" name="name" value="@Model.Name" class="form-control input-hologram" required />
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label class="control-label text-warning">AGE (Years)</label>
+                            <input type="number" name="age" value="@Model.Age" class="form-control input-hologram border-warning" placeholder="e.g. 25" min="14" max="100" />
+                        </div>
+                        <div class="col-md-4 mt-4 mt-md-0">
+                            <label class="control-label text-warning">HEIGHT (cm)</label>
+                            <input type="number" name="height" value="@Model.Height" class="form-control input-hologram border-warning" placeholder="e.g. 180" min="100" max="250" />
+                        </div>
+                        <div class="col-md-4 mt-4 mt-md-0">
+                            <label class="control-label text-warning">WEIGHT (kg)</label>
+                            <input type="number" step="0.1" name="weight" value="@Model.Weight" class="form-control input-hologram border-warning" placeholder="e.g. 80.5" min="30" max="300" />
+                        </div>
+                    </div>
+
+                    @if (Model.Role != "Admin")
+                    {
+                        <div class="mb-4">
+                            <label class="control-label text-info">SHIPPING ADDRESS</label>
+                            <textarea name="address" class="form-control input-hologram border-info" rows="2" placeholder="Enter full address for shop deliveries...">@Model.Address</textarea>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <label class="control-label">EMAIL ADDRESS (Read Only)</label>
+                        <input type="email" value="@Model.Email" class="form-control input-hologram opacity-50" readonly />
+                    </div>
+
+                    <button type="submit" class="font-bebas btn btn-liquid fs-4 w-100 py-2 mt-2">SAVE PROFILE INFO</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-cyber-glow bg-black p-4 p-md-5 h-100 d-flex flex-column" style="border-top: 5px solid #dc3545;">
+
+                <h3 class="font-bebas text-danger mb-4" style="letter-spacing: 2px;">Security Zone</h3>
+
+                <form asp-action="ChangePassword" method="post">
+                    <div class="mb-4">
+                        <label class="control-label text-danger">CURRENT PASSWORD</label>
+                        <input type="password" name="currentPassword" class="form-control input-hologram border-danger" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="control-label text-danger">NEW PASSWORD</label>
+                        <input type="password" name="newPassword" class="form-control input-hologram border-danger" minlength="6" required />
+                    </div>
+
+                    <button type="submit" class="font-bebas btn btn-outline-danger w-100 fs-4 py-2 mt-2">UPDATE PASSWORD</button>
+                </form>
+
+                <div class="mt-5 pt-4 border-top border-secondary text-center">
+                    <h5 class="font-montserrat text-white fw-bold text-uppercase fs-6 mb-3">Gym Status</h5>
+                    <span class="badge @(Model.Role == "Admin" ? "bg-warning text-dark" : "bg-info text-dark") font-bebas fs-4 px-4 py-2 shadow-lg mb-4 d-inline-block">
+                        ACCESS LEVEL: @Model.Role.ToUpper()
+                    </span>
+
+                    @if (Model.Role != "Admin")
+                    {
+                        <a href="/Appointments" class="font-bebas btn btn-info w-100 fs-4 py-2 shadow-lg btn-firework" style="letter-spacing: 2px;">
+                             MY BOOKINGS
+                        </a>
+                    }
+                </div>
+
+                <div class="mt-auto pt-5">
+                    <div class="border border-danger rounded p-3 text-center" style="background: rgba(220, 53, 69, 0.05);">
+                        <h5 class="font-montserrat text-danger fw-bold text-uppercase fs-6 mb-3">Danger Zone</h5>
+                        <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('WARNING: This action is irreversible! You will lose your wallet balance and active memberships. Are you absolutely sure?');">
+                            <button type="submit" class="font-bebas btn btn-outline-danger w-100 fs-4 py-2"> DELETE ACCOUNT</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('avatarPreview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+}

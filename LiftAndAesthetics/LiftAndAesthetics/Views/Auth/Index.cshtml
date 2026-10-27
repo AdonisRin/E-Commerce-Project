@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Login & Register";
+    var returnUrl = ViewData["ReturnUrl"]?.ToString();
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);">MEMBER PORTAL</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Jump into your account or forge a new legacy.</p>
+</div>
+
+<div class="container mt-5 mb-5 pt-4">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert bg-dark text-success border border-success text-center shadow-sm font-montserrat fw-bold fs-5 mb-5" role="alert">
+             @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert bg-dark text-danger border border-danger text-center shadow-sm font-montserrat fw-bold fs-5 mb-5" role="alert">
+             @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="row g-5">
+
+        <div class="col-md-6">
+            <div class="p-4 p-md-5 rounded-4 shadow-lg h-100 card-cyber-glow" style="background: linear-gradient(145deg, #111 0%, #1a0505 100%); border: 1px solid #333; border-top: 5px solid #dc3545;">
+                <h2 class="font-bebas text-crisp-white mb-4 text-hologram" style="font-size: 3rem; letter-spacing: 2px;">LOG IN</h2>
+
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <div class="mb-4">
+                        <label class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Email address</label>
+                        <input type="email" name="email" class="form-control input-hologram font-montserrat p-3" placeholder="Enter email" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Password</label>
+                        <input type="password" name="password" class="form-control input-hologram font-montserrat p-3" placeholder="Password" required>
+                    </div>
+
+                    <button type="submit" class="font-bebas btn btn-liquid w-100 fs-3 py-2 mt-3" style="letter-spacing: 2px;">Access Account</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="p-4 p-md-5 rounded-4 shadow-lg h-100 card-cyber-glow" style="background: linear-gradient(145deg, #0a0a0a 0%, #111 100%); border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <h2 class="font-bebas text-neon-red mb-4 text-hologram" style="font-size: 3rem; letter-spacing: 2px;">CREATE ACCOUNT</h2>
+
+                <form asp-controller="Auth" asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <div class="mb-4">
+                        <label class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Your Name</label>
+                        <input type="text" name="name" class="form-control input-hologram font-montserrat p-3" placeholder="What's your name?" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Email address</label>
+                        <input type="email" name="email" class="form-control input-hologram font-montserrat p-3" placeholder="name@email.com" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Password</label>
+                        <input type="password" name="password" class="form-control input-hologram font-montserrat p-3" placeholder="Create a strong password" required />
+                        <small class="text font-montserrat fw-bold mt-1 d-block">Min. 6 chars, 1 digit, 1 uppercase.</small>
+                    </div>
+
+                    <button type="submit" class="font-bebas btn btn-liquid w-100 fs-3 py-2 mt-2" style="letter-spacing: 2px;">Sign Up Now</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

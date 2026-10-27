@@ -1,0 +1,135 @@
+@using Microsoft.AspNetCore.Identity
+@using LiftAndAesthetics.Models
+@using Microsoft.EntityFrameworkCore
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject LiftContext DbContext
+
+<ul class="navbar-nav align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var email = User.Identity?.Name;
+        var member = await DbContext.Members.Include(m => m.Membership).FirstOrDefaultAsync(m => m.Email == email);
+
+        var memberName = member?.Name ?? email?.Split('@')[0] ?? "Athlete";
+
+        var isAdmin = User.IsInRole("Admin") || member?.Role == "Admin";
+
+        <li class="nav-item me-3 d-flex align-items-center mt-3 mt-lg-0">
+            <div class="d-flex align-items-center gap-3">
+
+                <a href="/Profile" class="d-flex align-items-center gap-3 pe-3 border-end border-secondary text-decoration-none profile-link-hover">
+
+                    <div class="text-end lh-1 d-none d-sm-block">
+                        <div class="text-white font-montserrat fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">
+                            @memberName
+                        </div>
+
+                        @if (isAdmin)
+                        {
+                            <div class="text-warning font-montserrat mt-1 fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px;">
+                                ADMIN ACCES <span class="text-danger mx-1">|</span> UNLIMITED
+                            </div>
+                        }
+                        else
+                        {
+                            bool hasPlan = member?.MembershipId != null;
+                            bool isExpired = member?.MembershipExpiryDate == null || member.MembershipExpiryDate < DateTime.Now;
+
+                            string planStatus;
+                            string colorStatus;
+
+                            if (hasPlan && !isExpired)
+                            {
+                                planStatus = member!.Membership!.Name;
+                                colorStatus = "text-success";
+                            }
+                            else if (hasPlan && isExpired)
+                            {
+                                planStatus = $"{member!.Membership!.Name} (Expired)";
+                                colorStatus = "text-danger";
+                            }
+                            else
+                            {
+                                planStatus = "No Active Plan";
+                                colorStatus = "text-danger";
+                            }
+
+                            string expiryText = isExpired ? "Renew Now" : member?.MembershipExpiryDate?.ToString("dd MMM");
+
+                            <div class="text-secondary font-montserrat mt-1 fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px;">
+                                Member <span class="text-secondary mx-1">|</span>
+                                <span class="@colorStatus">@planStatus</span>
+                                @if (!isExpired)
+                                {
+                                    <span class="text-secondary mx-1">-</span> <span>Until @expiryText</span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="rounded-circle overflow-hidden border border-danger shadow-lg profile-avatar-container flex-shrink-0">
+                        <img src="@(string.IsNullOrEmpty(member?.ProfilePictureUrl) ? $"https://ui-avatars.com/api/?name={memberName}&background=dc3545&color=fff&bold=true" : member.ProfilePictureUrl)"
+                             alt="Profile" class="w-100 h-100 object-fit-cover">
+                    </div>
+                </a>
+
+                @if (!isAdmin)
+                {
+                    var wallet = member != null ? member.WalletBalance.ToString("0.00") : "0.00";
+                    <div class="bg-dark border border-secondary rounded px-2 py-1 text-center shadow-sm flex-shrink-0">
+                        <span class="d-block text-muted font-montserrat fw-bolder" style="font-size: 0.60rem; letter-spacing: 1px; margin-bottom: 2px;">WALLET</span>
+                        <span class="text-success font-bebas" style="font-size: 1.1rem; letter-spacing: 1px; line-height: 1;">
+                            @wallet <small class="text-white-50" style="font-size: 0.8rem;">LEI</small>
+                        </span>
+                    </div>
+                }
+
+            </div>
+        </li>
+
+        @if (!isAdmin)
+        {
+            <li class="nav-item ms-2 mt-3 mt-lg-0">
+                <a class="font-bebas btn btn-outline-success btn-sm fs-5 px-3" asp-controller="Cart" asp-action="Index">Cart</a>
+            </li>
+        }
+
+        <li class="nav-item ms-2 mt-3 mt-lg-0">
+            <form class="form-inline" asp-controller="Auth" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="font-bebas btn btn-outline-danger btn-sm fs-5 px-3">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item ms-2 mt-3 mt-lg-0">
+            <a class="font-bebas btn btn-outline-danger btn-sm fs-5 px-3" asp-controller="Auth" asp-action="Index" style="letter-spacing: 1px;">
+                LOGIN / REGISTER
+            </a>
+        </li>
+    }
+</ul>
+
+<style>
+    .profile-link-hover {
+        transition: all 0.3s ease;
+    }
+
+        .profile-link-hover:hover {
+            transform: translateX(5px);
+        }
+
+    .profile-avatar-container {
+        width: 45px;
+        height: 45px;
+        background-color: #111;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-link-hover:hover .profile-avatar-container {
+        border-color: #0dcaf0 !important;
+        box-shadow: 0 0 15px rgba(13, 202, 240, 0.4) !important;
+    }
+</style>

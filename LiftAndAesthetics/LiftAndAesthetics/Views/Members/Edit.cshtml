@@ -1,0 +1,66 @@
+﻿@model LiftAndAesthetics.Models.Members
+
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070') center/cover; border-bottom: 3px solid #ffc107;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);"> Edit Member Profile</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Update role or subscription for <strong>@Model.Name</strong>.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-4 p-md-5 rounded-4 shadow-lg card-cyber-glow" style="background: linear-gradient(145deg, #111 0%, #1a0505 100%); border: 1px solid #333; border-top: 5px solid #ffc107;">
+
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger fw-bold font-montserrat mb-3"></div>
+                    <input type="hidden" asp-for="MemberId" />
+
+                    <input type="hidden" asp-for="Password" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Name" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Full Name</label>
+                            <input asp-for="Name" class="form-control input-hologram font-montserrat p-3" required />
+                            <span asp-validation-for="Name" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Email" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Email Address</label>
+                            <input asp-for="Email" class="form-control input-hologram font-montserrat p-3" readonly />
+                            <small class="text-muted font-montserrat fw-bold mt-1 d-block">Emails cannot be changed.</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label font-montserrat text-warning fw-bold text-uppercase" style="letter-spacing: 1px;">Role / Access Level</label>
+                            <select name="UserRole" class="form-select input-hologram font-montserrat p-3" style="background: #000;" asp-items="ViewBag.Roles">
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="MembershipId" class="form-label font-montserrat text-info fw-bold text-uppercase" style="letter-spacing: 1px;">Active Membership</label>
+                            <select asp-for="MembershipId" class="form-select input-hologram font-montserrat p-3" style="background: #000;" asp-items="ViewBag.MembershipId">
+                                <option value="">-- No Active Plan --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top border-secondary">
+                        <button type="submit" class="font-bebas btn btn-warning fs-3 px-5 py-2 flex-grow-1" style="letter-spacing: 2px;">Update Member</button>
+                        <a href="/Members" class="font-bebas btn btn-outline-light fs-3 px-5 py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
