@@ -1,0 +1,72 @@
+﻿@model IEnumerable<LiftAndAesthetics.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Shop";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=2082') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);"> Shop Inventory</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Manage products, prices, and stock.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="font-bebas text-white text-hologram" style="letter-spacing: 2px;">All Products</h3>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="font-bebas btn btn-liquid fs-4 px-4 py-2" style="letter-spacing: 1px;"> Add New Product</a>
+        }
+    </div>
+
+    <div class="card-cyber-glow bg-black p-0" style="border: 1px solid #333 !important; border-radius: 15px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 font-montserrat">
+                <thead class="font-bebas fs-4 text-neon-red" style="letter-spacing: 1px; border-bottom: 2px solid #dc3545;">
+                    <tr>
+                        <th class="py-3 px-4">Image</th>
+                        <th class="py-3 px-4">Name</th>
+                        <th class="py-3 px-4">Category</th>
+                        <th class="py-3 px-4">Price</th>
+                        <th class="py-3 px-4 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <h3 class="font-bebas text-crisp-white opacity-50" style="letter-spacing: 2px;"> The inventory is empty.</h3>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr style="border-bottom: 1px solid #222;">
+                                <td class="px-4 py-3">
+                                    <div class="bg-white rounded d-flex justify-content-center align-items-center img-zoom-extreme" style="width: 60px; height: 60px; border: 2px solid #333;">
+                                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://via.placeholder.com/50" : item.ImageUrl)" style="max-height: 50px; object-fit: contain;" class="rounded">
+                                    </div>
+                                </td>
+                                <td class="px-4 fw-bold text-white fs-5 text-hologram">@item.Name</td>
+                                <td class="px-4 text-secondary fw-bold text-uppercase small">@item.Category</td>
+                                <td class="px-4 text-neon-red fw-bold fs-5">@item.Price LEI</td>
+                                <td class="px-4 text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.ProductId" class="font-bebas btn btn-sm btn-outline-warning fs-5 px-3">Edit</a>
+                                            <a asp-action="Delete" asp-route-id="@item.ProductId" class="font-bebas btn btn-sm btn-outline-danger fs-5 px-3">Delete</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

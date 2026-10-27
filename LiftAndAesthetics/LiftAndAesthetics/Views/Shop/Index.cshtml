@@ -1,0 +1,152 @@
+@model IEnumerable<LiftAndAesthetics.Models.Product>
+
+@{
+    ViewData["Title"] = "Gym Shop";
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.9), rgba(10,12,16,0.95)), url('https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=2082') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-2 text-uppercase text-white" style="letter-spacing: 3px;">Gym Shop</h1>
+    <p class="font-montserrat lead fw-bold text-light opacity-75 text-uppercase" style="letter-spacing: 1px;">Supplements, gear, and apparel to support your training.</p>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="font-bebas btn btn-danger fs-4 px-4 py-2 mt-2" style="letter-spacing: 1px;">Add New Product</a>
+    }
+</div>
+
+<div class="container mb-5 mt-5">
+    <div class="row justify-content-center mb-4">
+        <div class="col-12 text-center">
+            <div class="search-container">
+                <input type="text" id="searchBox" class="cyber-search font-montserrat fw-semibold" placeholder="Search products by name or category..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Pills Filter (A1, B1) -->
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-5 pb-3 border-bottom border-secondary" id="categoryFilters">
+        <button type="button" class="btn btn-danger font-bebas fs-5 px-4 category-btn active" data-category="All" style="letter-spacing: 1px;">ALL PRODUCTS</button>
+        <button type="button" class="btn btn-outline-secondary text-white font-bebas fs-5 px-4 category-btn" data-category="Supplements" style="letter-spacing: 1px;">SUPPLEMENTS</button>
+        <button type="button" class="btn btn-outline-secondary text-white font-bebas fs-5 px-4 category-btn" data-category="Clothing" style="letter-spacing: 1px;">CLOTHING</button>
+        <button type="button" class="btn btn-outline-secondary text-white font-bebas fs-5 px-4 category-btn" data-category="Equipment" style="letter-spacing: 1px;">EQUIPMENT</button>
+        <button type="button" class="btn btn-outline-secondary text-white font-bebas fs-5 px-4 category-btn" data-category="Accessories" style="letter-spacing: 1px;">ACCESSORIES</button>
+    </div>
+
+    <div class="row g-4" id="productsContainer">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center alert alert-danger bg-dark text-danger font-bebas fs-2 shadow-sm p-5 border-0" style="background-color: #1a1e27 !important;">
+                <p class="mb-2">No products available in the shop right now.</p>
+                <p class="mb-0 fw-normal text-white opacity-75 fs-5 font-montserrat">Check back soon for restocks or updates.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-12 product-card-col" data-category="@item.Category">
+                    <div class="card border-0 shadow-sm overflow-hidden text-white" style="background: #141721; border-left: 4px solid #dc3545 !important; border-radius: 8px;">
+                        <div class="row g-0 h-100">
+                            <div class="col-md-4 col-lg-3 position-relative d-flex align-items-center justify-content-center p-4 border-end" style="border-color: #242938 !important; background: #10131a;">
+                                <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://via.placeholder.com/300/111/dc3545?text=Product" : item.ImageUrl)"
+                                     class="img-fluid" style="max-height: 200px; object-fit: contain;" alt="@item.Name"
+                                     onerror="this.src='https://via.placeholder.com/300/111/dc3545?text=Product';">
+                                <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 font-bebas" style="letter-spacing: 1px;">@item.Category</span>
+                            </div>
+
+                            <div class="col-md-8 col-lg-9">
+                                <div class="card-body p-4 d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2 border-bottom pb-3" style="border-color: #242938 !important;">
+                                        <div>
+                                            <h2 class="font-bebas card-title text-white mb-1" style="letter-spacing: 1px; font-size: 2.2rem;">@item.Name</h2>
+                                            <span class="badge bg-success font-montserrat fw-bold px-2 py-1" style="font-size: 0.75rem;">In Stock - Ready to Ship</span>
+                                        </div>
+                                        <h2 class="font-bebas text-danger mb-0 display-6" style="letter-spacing: 1px;">@item.Price <span class="fs-5 text-secondary">LEI</span></h2>
+                                    </div>
+
+                                    <p class="font-montserrat card-text text-light opacity-75 fw-normal fs-6 flex-grow-1">
+                                        @(string.IsNullOrEmpty(item.Description) ? "Quality product engineered for athletic performance." : item.Description)
+                                    </p>
+
+                                    <div class="d-flex gap-2 flex-wrap mt-auto pt-3">
+                                        @if (!User.IsInRole("Admin"))
+                                        {
+                                            @if (User.Identity.IsAuthenticated)
+                                            {
+                                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="flex-grow-1 flex-md-grow-0">
+                                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                                    <button type="submit" class="font-bebas btn btn-danger fs-4 w-100 px-4 py-2" style="letter-spacing: 1px;">Add to Cart</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <a href="/Auth" class="font-bebas btn btn-outline-danger fs-4 w-100 px-4 py-2 flex-grow-1 flex-md-grow-0" style="letter-spacing: 1px;">Log in to Buy</a>
+                                            }
+                                        }
+
+                                        <a asp-action="Details" asp-route-id="@item.ProductId" class="font-bebas btn btn-outline-light fs-4 px-4 py-2 flex-grow-1 flex-md-grow-0">View Details</a>
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <div class="ms-md-auto d-flex gap-2 flex-grow-1 flex-md-grow-0 mt-2 mt-md-0">
+                                                <a asp-action="Edit" asp-route-id="@item.ProductId" class="font-bebas btn btn-sm btn-outline-warning fs-5 px-3 py-2">Edit</a>
+                                                <a asp-action="Delete" asp-route-id="@item.ProductId" class="font-bebas btn btn-sm btn-outline-danger fs-5 px-3 py-2">Delete</a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var selectedCategory = "All";
+
+            $(".category-btn").on("click", function () {
+                $(".category-btn").removeClass("btn-danger active").addClass("btn-outline-secondary text-white");
+                $(this).removeClass("btn-outline-secondary text-white").addClass("btn-danger active");
+                selectedCategory = $(this).data("category");
+                filterProducts();
+            });
+
+            $("#searchBox").on("keyup", function () {
+                filterProducts();
+            });
+
+            function filterProducts() {
+                var query = $("#searchBox").val().toLowerCase().trim();
+
+                $(".product-card-col").each(function () {
+                    var cardCat = $(this).data("category") || "";
+                    var cardName = $(this).find(".card-title").text().toLowerCase();
+
+                    var matchesCategory = (selectedCategory === "All" || cardCat.toLowerCase() === selectedCategory.toLowerCase());
+                    var matchesQuery = (query === "" || cardName.includes(query) || cardCat.toLowerCase().includes(query));
+
+                    if (matchesCategory && matchesQuery) {
+                        $(this).fadeIn(120);
+                    } else {
+                        $(this).fadeOut(120);
+                    }
+                });
+
+                setTimeout(function () {
+                    if ($(".product-card-col:visible").length === 0) {
+                        if ($("#emptyStateMsg").length === 0) {
+                            $("#productsContainer").append('<div id="emptyStateMsg" class="col-12 text-center alert alert-dark text-danger font-bebas fs-3 shadow-sm p-4 border" style="background:#141721; border-color:#282e3e !important;">No products match your search.</div>');
+                        }
+                    } else {
+                        $("#emptyStateMsg").remove();
+                    }
+                }, 150);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,67 @@
+@model LiftAndAesthetics.Models.Product
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container mt-5 mb-5 pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="p-4 p-md-5 rounded-3 shadow-sm text-center" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #dc3545;">
+
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="p-3 bg-white rounded-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 100%; height: 280px; border: 1px solid #dee2e6;">
+                        <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://via.placeholder.com/300/111/dc3545?text=Product" : Model.ImageUrl)"
+                             class="img-fluid" style="max-height: 250px; object-fit: contain;" alt="@Model.Name">
+                    </div>
+                </div>
+
+                <h1 class="font-bebas text-white text-uppercase mb-2" style="font-size: 2.8rem; letter-spacing: 2px;">@Model.Name</h1>
+
+                <h2 class="font-bebas text-danger mb-4" style="font-size: 2.4rem; letter-spacing: 1px;">@Model.Price <span class="fs-4 text-secondary">LEI</span></h2>
+
+                <div class="p-3 p-md-4 rounded-3 text-start mb-4" style="background: #10131a; border: 1px solid #242938;">
+                    <p class="font-montserrat text-light fs-6 mb-3 border-bottom pb-2" style="border-color: #242938 !important;">
+                        <strong class="text-danger">Category:</strong> <br />
+                        <span class="opacity-75">@Model.Category</span>
+                    </p>
+                    <p class="font-montserrat text-light fs-6 mb-3 border-bottom pb-2" style="border-color: #242938 !important;">
+                        <strong class="text-danger">Availability:</strong> <br />
+                        <span class="badge bg-success fs-6 mt-1 px-3 py-1 fw-bold font-montserrat">In Stock - Ready to Ship</span>
+                    </p>
+                    <p class="font-montserrat text-light fs-6 mb-3 border-bottom pb-2" style="border-color: #242938 !important;">
+                        <strong class="text-danger">Description:</strong> <br />
+                        <span class="opacity-75">@(string.IsNullOrEmpty(Model.Description) ? "Quality fitness nutrition and training product." : Model.Description)</span>
+                    </p>
+                    <p class="font-montserrat text-light fs-6 mb-0">
+                        <strong class="text-danger">Product SKU:</strong> <br />
+                        <span class="opacity-75">#LIFT-@Model.ProductId</span>
+                    </p>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    @if (!User.IsInRole("Admin"))
+                    {
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                <button type="submit" class="font-bebas btn btn-danger fs-4 px-5 py-2 text-uppercase" style="letter-spacing: 1px;">Add to Cart</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a href="/Auth" class="font-bebas btn btn-outline-danger fs-4 px-5 py-2 text-uppercase" style="letter-spacing: 1px;">Log in to Buy</a>
+                        }
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.ProductId" class="font-bebas btn btn-outline-warning fs-4 px-4 py-2">Edit Product</a>
+                    }
+                    <a asp-action="Index" class="font-bebas btn btn-outline-light fs-4 px-4 py-2">Back to Shop</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
