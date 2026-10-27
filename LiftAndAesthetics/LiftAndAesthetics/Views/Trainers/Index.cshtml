@@ -1,0 +1,142 @@
+﻿@model IEnumerable<LiftAndAesthetics.Models.Trainer>
+
+@{
+    ViewData["Title"] = "Trainers";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px;">Meet Our Trainers</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">The people who will help you lift heavier and look better.</p>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="mt-4">
+            <a asp-action="Create" class="font-bebas btn btn-liquid fs-3 px-4 py-2" style="letter-spacing: 2px;"> Add New Trainer</a>
+        </div>
+    }
+</div>
+
+<div class="container mt-5 mb-5">
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-12 text-center">
+            <div class="search-container">
+                <span class="search-icon-overlay"></span>
+                <input type="text" id="searchTrainers" class="cyber-search input-hologram font-montserrat fw-bold" style="padding-left: 45px !important;" placeholder="Search trainers by name..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 text-center" id="trainersContainer">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 bg-black text-white card-cyber-glow p-3">
+
+                    <div class="pt-4 overflow-hidden rounded-circle mx-auto" style="width: 200px; height: 200px; border: 3px solid #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);">
+                        <img src="@(string.IsNullOrWhiteSpace(item.PhotoUrl) ? "https://via.placeholder.com/200/111/dc3545?text=+" : item.PhotoUrl)"
+                             class="img-fluid img-zoom-extreme h-100 w-100" style="object-fit: cover;"
+                             alt="@item.Name"
+                             onerror="this.src='https://via.placeholder.com/200/111/dc3545?text=+';">
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="font-bebas card-title text-crisp-white mt-3 text-hologram" style="letter-spacing: 2px; font-size: 2.5rem;">@item.Name</h2>
+                        <h5 class="font-montserrat text-neon-red fw-bolder text-uppercase" style="letter-spacing: 1px;">@item.Specialization</h5>
+
+                        <p class="font-montserrat card-text fst-italic text-crisp-white opacity-75 my-3 flex-grow-1">
+                            "@(string.IsNullOrWhiteSpace(item.Motto) ? "Dedicated expert ready to help you reach your goals." : item.Motto)"
+                        </p>
+
+                        <button class="font-bebas btn btn-liquid fs-5 w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#details_@(item.TrainerId)">See details</button>
+
+                        <div class="collapse mt-2" id="details_@(item.TrainerId)">
+                            <div class="p-3 border border-secondary rounded bg-dark text-start small font-montserrat text-crisp-white">
+                                <div class="mb-2"><strong class="text-neon-red">Experience:</strong> @(string.IsNullOrWhiteSpace(item.Experience) ? "Not specified" : item.Experience)</div>
+                                <div class="mb-2"><strong class="text-neon-red">Availability:</strong> @(string.IsNullOrWhiteSpace(item.Availability) ? "Ask at reception" : item.Availability)</div>
+                                <div class="mb-2"><strong class="text-neon-red">Phone:</strong> @(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Not specified" : item.PhoneNumber)</div>
+
+                                <div class="mt-3 pt-3 border-top border-secondary text-center d-flex justify-content-center gap-2">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.TrainerId" class="font-bebas btn btn-sm btn-outline-warning fs-5 px-3">Edit</a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.TrainerId" class="font-bebas btn btn-sm btn-outline-info fs-5 px-3">Details</a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.TrainerId" class="font-bebas btn btn-sm btn-outline-danger fs-5 px-3">Delete</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#searchTrainers").on("keyup", function () {
+                var searchQuery = $(this).val();
+                var isAdmin = '@User.IsInRole("Admin")' === 'True';
+
+                $.ajax({
+                    url: '/Trainers/Search',
+                    type: 'GET',
+                    data: { query: searchQuery },
+                    success: function (data) {
+                        var container = $("#trainersContainer");
+                        container.empty();
+
+                        if (data.length === 0) {
+                            container.append('<div class="col-12 text-center alert alert-danger bg-black text-neon-red border-danger font-bebas fs-2 p-5 shadow-lg">No trainers found.</div>');
+                        } else {
+                            $.each(data, function (index, item) {
+                                var imgUrl = item.photoUrl ? item.photoUrl : "https://via.placeholder.com/200/111/dc3545?text=+";
+                                var motto = item.motto ? item.motto : "Dedicated expert ready to help you reach your goals.";
+                                var exp = item.experience ? item.experience : "Not specified";
+                                var avail = item.availability ? item.availability : "Ask at reception";
+                                var phone = item.phoneNumber ? item.phoneNumber : "Not specified";
+
+                                var actionBtns = isAdmin ?
+                                    `<a href="/Trainers/Edit/${item.trainerId}" class="font-bebas btn btn-sm btn-outline-warning fs-5 px-3">Edit</a>
+                                     <a href="/Trainers/Details/${item.trainerId}" class="font-bebas btn btn-sm btn-outline-info fs-5 px-3">Details</a>
+                                     <a href="/Trainers/Delete/${item.trainerId}" class="font-bebas btn btn-sm btn-outline-danger fs-5 px-3">Delete</a>` :
+                                    `<a href="/Trainers/Details/${item.trainerId}" class="font-bebas btn btn-sm btn-outline-info fs-5 px-3">Details</a>`;
+
+                                var card = `
+                                    <div class="col-md-4">
+                                        <div class="card h-100 bg-black text-white card-cyber-glow p-3">
+                                            <div class="pt-4 overflow-hidden rounded-circle mx-auto" style="width: 200px; height: 200px; border: 3px solid #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);">
+                                                <img src="${imgUrl}" class="img-fluid img-zoom-extreme h-100 w-100" style="object-fit: cover;" alt="${item.name}" onerror="this.src='https://via.placeholder.com/200/111/dc3545?text=+';">
+                                            </div>
+                                            <div class="card-body d-flex flex-column">
+                                                <h2 class="font-bebas card-title text-crisp-white mt-3 text-hologram" style="letter-spacing: 2px; font-size: 2.5rem;">${item.name}</h2>
+                                                <h5 class="font-montserrat text-neon-red fw-bolder text-uppercase" style="letter-spacing: 1px;">${item.specialization}</h5>
+                                                <p class="font-montserrat card-text fst-italic text-crisp-white opacity-75 my-3 flex-grow-1">"${motto}"</p>
+                                                <button class="font-bebas btn btn-liquid fs-5 w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#details_${item.trainerId}">See details</button>
+                                                <div class="collapse mt-2" id="details_${item.trainerId}">
+                                                    <div class="p-3 border border-secondary rounded bg-dark text-start small font-montserrat text-crisp-white">
+                                                        <div class="mb-2"><strong class="text-neon-red">Experience:</strong> ${exp}</div>
+                                                        <div class="mb-2"><strong class="text-neon-red">Availability:</strong> ${avail}</div>
+                                                        <div class="mb-2"><strong class="text-neon-red">Phone:</strong> ${phone}</div>
+                                                        <div class="mt-3 pt-3 border-top border-secondary text-center d-flex justify-content-center gap-2">
+                                                            ${actionBtns}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                container.append(card);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

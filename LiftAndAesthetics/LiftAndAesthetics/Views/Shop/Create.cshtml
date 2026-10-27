@@ -1,0 +1,69 @@
+﻿@model LiftAndAesthetics.Models.Product
+
+@{
+    ViewData["Title"] = "Add Product";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=2082') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);"> Add New Product</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Stock up the gym shop.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-4 p-md-5 rounded-4 shadow-lg card-cyber-glow" style="background: linear-gradient(145deg, #111 0%, #1a0505 100%); border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <form asp-action="Create" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger fw-bold font-montserrat mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Name" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Product Name</label>
+                            <input asp-for="Name" class="form-control input-hologram font-montserrat p-3" placeholder="e.g. Whey Protein" required />
+                            <span asp-validation-for="Name" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Price" class="form-label font-montserrat text-neon-red fw-bold text-uppercase" style="letter-spacing: 1px;">Price (LEI)</label>
+                            <input asp-for="Price" type="number" step="0.01" class="form-control input-hologram font-montserrat p-3 font-bebas fs-4" placeholder="150.00" required />
+                            <span asp-validation-for="Price" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Category" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Category</label>
+                        <select asp-for="Category" class="form-select input-hologram font-montserrat p-3" style="background: #000;">
+                            <option value="Supplements">Supplements</option>
+                            <option value="Apparel">Apparel & Clothing</option>
+                            <option value="Gear">Gym Gear</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Description</label>
+                        <textarea asp-for="Description" class="form-control input-hologram font-montserrat p-3" rows="4" placeholder="Describe the product..."></textarea>
+                    </div>
+
+                    <div class="mb-4 border-top border-secondary pt-4 mt-2">
+                        <label class="form-label font-montserrat text-neon-red fw-bold text-uppercase" style="letter-spacing: 1px;"> Upload Product Image</label>
+                        <input type="file" name="imageFile" class="form-control input-hologram font-montserrat p-3" accept="image/*" />
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top border-secondary">
+                        <button type="submit" class="font-bebas btn btn-liquid fs-3 px-5 py-2 flex-grow-1" style="letter-spacing: 2px;">Save Product</button>
+                        <a asp-action="Index" class="font-bebas btn btn-outline-light fs-3 px-5 py-2">Cancel</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

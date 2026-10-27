@@ -1,0 +1,268 @@
+﻿@model IEnumerable<LiftAndAesthetics.Models.Membership>
+
+@{
+    ViewData["Title"] = "Pricing";
+    int mostPopularId = ViewBag.MostPopularId ?? 0;
+    int currentPlanId = ViewBag.CurrentPlanId ?? 0;
+    int daysLeft = ViewBag.DaysLeft ?? 0;
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070') center/cover; border-bottom: 3px solid #dc3545;">
+    <h1 class="font-bebas display-1 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 5px; text-shadow: 0 0 30px rgba(255, 42, 42, 0.9);">Gym Memberships</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 2px;">Simple prices. No hidden fees. Just come and lift.</p>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="font-bebas btn btn-liquid fs-3 px-5 py-2 mt-3" style="letter-spacing: 2px;"> Add New Plan</a>
+    }
+</div>
+
+<div class="container mt-5 mb-5">
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8 text-center">
+            <div class="search-container">
+                <span class="search-icon-overlay"></span>
+                <input type="text" id="searchMemberships" class="cyber-search input-hologram font-montserrat fw-bold" style="padding-left: 45px !important;" placeholder="Search pricing plans..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row text-center g-4 justify-content-center" id="membershipsContainer">
+        @foreach (var plan in Model)
+        {
+            bool isPopular = plan.MembershipId == mostPopularId;
+            bool isCurrentPlan = (plan.MembershipId == currentPlanId && daysLeft > 0);
+
+            string extraClass = isPopular ? "card-cyber-glow" : "card-cyber-glow opacity-75";
+            string headerBg = isPopular ? "bg-black text-neon-red" : "bg-dark text-crisp-white";
+            string titleExtra = isPopular ? " " : "";
+
+            <div class="col-md-4">
+                <div class="card h-100 bg-black text-white @extraClass p-2">
+                    <div class="card-header @headerBg py-4 border-0" style="border-radius: 15px 15px 0 0;">
+                        <h2 class="font-bebas my-0 text-hologram" style="letter-spacing: 3px; font-size: 2.5rem;">@plan.Name @titleExtra</h2>
+                        @if (isPopular)
+                        {
+                            <span class="badge bg-danger mt-2 font-montserrat fw-bold">MOST POPULAR</span>
+                        }
+                    </div>
+                    <div class="card-body d-flex flex-column bg-black mt-1" style="border-radius: 0 0 15px 15px;">
+                        <h1 class="font-bebas card-title text-neon-red display-3 mt-3 text-hologram">@plan.Price LEI</h1>
+                        <span class="font-montserrat text-crisp-white opacity-50 fw-bold fs-5 mb-3">/ MONTH</span>
+
+                        <p class="font-montserrat text-crisp-white fw-bold my-3 px-3">@plan.Description</p>
+
+                        <ul class="list-unstyled mt-3 mb-4 flex-grow-1 font-montserrat text-start px-4">
+                            @if (!string.IsNullOrEmpty(plan.Features))
+                            {
+                                foreach (var feature in plan.Features.Split(','))
+                                {
+                                    <li class="mb-3 border-bottom border-secondary pb-2">
+                                        <span class="text-neon-red fw-bolder me-2 fs-5"></span>
+                                        <span class="text-crisp-white opacity-75 fw-bold">@feature.Trim()</span>
+                                    </li>
+                                }
+                            }
+                        </ul>
+
+                        <div class="mt-4 text-center mt-auto d-flex flex-column justify-content-center gap-2">
+                            
+                            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+                            {
+                                <form action="/Memberships/Buy" method="post" id="form-buy-@plan.MembershipId">
+                                    <input type="hidden" name="membershipId" value="@plan.MembershipId" />
+                                    @Html.AntiForgeryToken()
+                                    
+                                    @if (isCurrentPlan)
+                                    {
+                                        <button type="button" onclick="confirmExtend(@plan.MembershipId, '@plan.Name', @daysLeft)" class="font-bebas btn btn-outline-info fs-3 px-4 py-2 mb-2 w-100" style="letter-spacing: 1px;"> EXTEND PLAN</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" onclick="confirmBuy(@plan.MembershipId, '@plan.Name', @currentPlanId, @daysLeft)" class="font-bebas btn btn-liquid fs-3 px-4 py-2 mb-2 w-100" style="letter-spacing: 1px;"> BUY NOW</button>
+                                    }
+                                </form>
+                            }
+                            else if (!User.Identity.IsAuthenticated)
+                            {
+                                <a href="/Auth" class="font-bebas btn btn-outline-danger fs-3 px-4 py-2 mb-2" style="letter-spacing: 1px;">Log in to Buy</a>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="/Memberships/Edit/@plan.MembershipId" class="font-bebas btn btn-sm btn-outline-warning fs-4 px-4">Edit</a>
+                                    <a href="/Memberships/Delete/@plan.MembershipId" class="font-bebas btn btn-sm btn-outline-danger fs-4 px-4">Delete</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script type="text/javascript">
+        function confirmExtend(id, planName, daysLeft) {
+            Swal.fire({
+                title: 'Extend Membership?',
+                html: `You currently have <b style="color:#0dcaf0">${daysLeft} days</b> left on your <b>${planName}</b> plan.<br><br>Do you want to add 30 more days?`,
+                icon: 'info',
+                background: '#111',
+                color: '#fff',
+                showCancelButton: true,
+                confirmButtonColor: '#0dcaf0',
+                cancelButtonColor: '#333',
+                confirmButtonText: 'Yes, Extend!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-buy-' + id).submit();
+                }
+            });
+        }
+
+        function confirmBuy(id, planName, currentPlanId, daysLeft) {
+            let warningText = "";
+            if (currentPlanId !== 0 && daysLeft > 0) {
+                warningText = `<br><br><span style="color: #0dcaf0; font-weight: bold;"> SMART QUEUE ACTIVE: Your new membership will be added to the list and will start automatically in ${daysLeft} days, right after your current plan expires. No days lost!</span>`;
+            }
+
+            Swal.fire({
+                title: 'Purchase Plan',
+                html: `Are you sure you want to buy the <b>${planName}</b> plan?${warningText}`,
+                icon: 'warning',
+                background: '#111',
+                color: '#fff',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#333',
+                confirmButtonText: 'Yes, Buy Now!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-buy-' + id).submit();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            var mostPopularId = Number('@mostPopularId');
+            var isAdmin = '@User.IsInRole("Admin")' === 'True';
+            var isAuthenticated = '@User.Identity.IsAuthenticated' === 'True';
+            var currentPlanId = Number('@currentPlanId');
+            var daysLeft = Number('@daysLeft');
+
+            // Salvăm conținutul original al containerului când se încarcă pagina
+            var originalContent = $("#membershipsContainer").html();
+
+            $("#searchMemberships").on("keyup", function () {
+                var searchQuery = $(this).val().trim();
+
+                //  REPARAȚIA E AICI 
+                // Dacă căsuța de search e goală, pur și simplu repunem conținutul original!
+                if (searchQuery === "") {
+                    $("#membershipsContainer").html(originalContent);
+                    return; // Ne oprim, nu mai facem cerere AJAX
+                }
+
+                $.ajax({
+                    url: '/Memberships/Search',
+                    type: 'GET',
+                    data: { query: searchQuery },
+                    success: function (data) {
+                        var container = $("#membershipsContainer");
+                        container.empty();
+
+                        if (data.length === 0) {
+                            container.append('<div class="col-12 text-center alert alert-danger bg-black text-neon-red border-danger font-bebas fs-2 p-5 shadow-lg">No plans found.</div>');
+                        } else {
+                            $.each(data, function (index, plan) {
+                                // Aici ne asigurăm că luăm ID-ul corect din JSON. 
+                                // Unele serializatoare trimit "membershipId" (cămilă), altele "MembershipId" (Pascal). Folosim o șmecherie:
+                                var pId = plan.membershipId || plan.MembershipId;
+                                var pName = plan.name || plan.Name;
+                                var pPrice = plan.price || plan.Price;
+                                var pDesc = plan.description || plan.Description;
+                                var pFeats = plan.features || plan.Features;
+
+                                var isPopular = pId === mostPopularId;
+                                var isCurrentPlan = (pId === currentPlanId && daysLeft > 0);
+                                var extraClass = isPopular ? "card-cyber-glow" : "card-cyber-glow opacity-75";
+                                var headerBg = isPopular ? "bg-black text-neon-red" : "bg-dark text-crisp-white";
+                                var titleExtra = isPopular ? " " : "";
+                                var popBadge = isPopular ? `<span class="badge bg-danger mt-2 font-montserrat fw-bold">MOST POPULAR</span>` : "";
+
+                                var featuresList = "";
+                                if (pFeats) {
+                                    var feats = pFeats.split(',');
+                                    for (var i = 0; i < feats.length; i++) {
+                                        featuresList += `
+                                            <li class="mb-3 border-bottom border-secondary pb-2">
+                                                <span class="text-neon-red fw-bolder me-2 fs-5"></span>
+                                                <span class="text-crisp-white opacity-75 fw-bold">${feats[i].trim()}</span>
+                                            </li>`;
+                                    }
+                                }
+
+                                var actionButtons = "";
+
+                                if (isAuthenticated && !isAdmin) {
+                                    if (isCurrentPlan) {
+                                        actionButtons += `
+                                            <form action="/Memberships/Buy" method="post" id="form-buy-${pId}">
+                                                <input type="hidden" name="membershipId" value="${pId}" />
+                                                <input name="__RequestVerificationToken" type="hidden" value="$('input[name=__RequestVerificationToken]').val()" />
+                                                <button type="button" onclick="confirmExtend(${pId}, '${pName}', ${daysLeft})" class="font-bebas btn btn-outline-info fs-3 px-4 py-2 mb-2 w-100" style="letter-spacing: 1px;"> EXTEND PLAN</button>
+                                            </form>`;
+                                    } else {
+                                        actionButtons += `
+                                            <form action="/Memberships/Buy" method="post" id="form-buy-${pId}">
+                                                <input type="hidden" name="membershipId" value="${pId}" />
+                                                <input name="__RequestVerificationToken" type="hidden" value="$('input[name=__RequestVerificationToken]').val()" />
+                                                <button type="button" onclick="confirmBuy(${pId}, '${pName}', ${currentPlanId}, ${daysLeft})" class="font-bebas btn btn-liquid fs-3 px-4 py-2 mb-2 w-100" style="letter-spacing: 1px;"> BUY NOW</button>
+                                            </form>`;
+                                    }
+                                } else if (!isAuthenticated) {
+                                    actionButtons += `<a href="/Auth" class="font-bebas btn btn-outline-danger fs-3 px-4 py-2 mb-2" style="letter-spacing: 1px;">Log in to Buy</a>`;
+                                }
+
+                                if (isAdmin) {
+                                    actionButtons += `
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/Memberships/Edit/${pId}" class="font-bebas btn btn-sm btn-outline-warning fs-4 px-4">Edit</a>
+                                            <a href="/Memberships/Delete/${pId}" class="font-bebas btn btn-sm btn-outline-danger fs-4 px-4">Delete</a>
+                                        </div>`;
+                                }
+
+                                var card = `
+                                    <div class="col-md-4">
+                                        <div class="card h-100 bg-black text-white ${extraClass} p-2">
+                                            <div class="card-header ${headerBg} py-4 border-0" style="border-radius: 15px 15px 0 0;">
+                                                <h2 class="font-bebas my-0 text-hologram" style="letter-spacing: 3px; font-size: 2.5rem;">${pName} ${titleExtra}</h2>
+                                                ${popBadge}
+                                            </div>
+                                            <div class="card-body d-flex flex-column bg-black mt-1" style="border-radius: 0 0 15px 15px;">
+                                                <h1 class="font-bebas card-title text-neon-red display-3 mt-3 text-hologram">${pPrice} LEI</h1>
+                                                <span class="font-montserrat text-crisp-white opacity-50 fw-bold fs-5 mb-3">/ MONTH</span>
+                                                <p class="font-montserrat text-crisp-white fw-bold my-3 px-3">${pDesc}</p>
+                                                <ul class="list-unstyled mt-3 mb-4 flex-grow-1 font-montserrat text-start px-4">${featuresList}</ul>
+                                                <div class="mt-4 text-center mt-auto d-flex flex-column justify-content-center gap-2">
+                                                    ${actionButtons}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                container.append(card);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

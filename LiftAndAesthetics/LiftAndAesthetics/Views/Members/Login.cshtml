@@ -1,0 +1,95 @@
+﻿@model LiftAndAesthetics.Models.Members
+
+@{
+    ViewData["Title"] = "Login & Register";
+}
+
+<div class="container-fluid bg-secondary text-white text-center py-5">
+    <h1 class="display-4">Member Portal</h1>
+    <p class="lead">Jump into your account or make a new one.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success text-center shadow-sm fw-bold" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger text-center shadow-sm fw-bold" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="row g-5">
+      
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100 p-4">
+                <h3 class="mb-4">Log In</h3>
+                <form asp-action="Authenticate" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email address</label>
+                        <input type="email" name="email" class="form-control" placeholder="Enter email"
+                               data-val="true"
+                               data-val-required="Please enter your email."
+                               data-val-email="Please enter a valid email (e.g. name@domain.com).">
+                        <span class="text-danger fw-bold" style="color: #ff4500 !important; font-size: 0.9rem;"
+                              data-valmsg-for="email" data-valmsg-replace="true"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="Password"
+                               data-val="true"
+                               data-val-required="Don't forget your password!">
+                        <span class="text-danger fw-bold" style="color: #ff4500 !important; font-size: 0.9rem;"
+                              data-valmsg-for="password" data-valmsg-replace="true"></span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark w-100">Log In</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100 p-4" style="background-color: #fcfcfc;">
+                <h3 class="mb-4 text-danger">Create Account</h3>
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-bold">Your Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="What's your name?" />
+                        <span asp-validation-for="Name" class="text-danger fw-bold" style="color: #ff4500 !important; font-size: 0.9rem;"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-bold">Email address</label>
+                        <input asp-for="Email" class="form-control" placeholder="name@email.com" />
+                        <span asp-validation-for="Email" class="text-danger fw-bold" style="color: #ff4500 !important; font-size: 0.9rem;"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-bold">Password</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Create a password" />
+                        <span asp-validation-for="Password" class="text-danger fw-bold" style="color: #ff4500 !important; font-size: 0.9rem;"></span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-custom w-100">Sign Up</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+}

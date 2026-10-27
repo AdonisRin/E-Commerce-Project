@@ -1,0 +1,87 @@
+﻿@model LiftAndAesthetics.Models.FitnessClass
+
+@{
+    ViewData["Title"] = "Edit Class";
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url('https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=2069') center/cover; border-bottom: 3px solid #ffc107;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(255, 193, 7, 0.8);"> Edit Class</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Update the details for <strong>@Model.ClassName</strong>.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card-cyber-glow bg-black p-4 p-md-5" style="border: 1px solid #333 !important; border-top: 5px solid #ffc107 !important;">
+
+                <form asp-action="Edit" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger fw-bold font-montserrat mb-3"></div>
+
+                    <input type="hidden" asp-for="FitnessClassId" />
+                    <input type="hidden" asp-for="MainPhotoUrl" />
+                    <input type="hidden" asp-for="ExtraPhoto1Url" />
+                    <input type="hidden" asp-for="ExtraPhoto2Url" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="ClassName" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Class Name</label>
+                            <input asp-for="ClassName" class="form-control input-hologram font-montserrat p-3" required />
+                            <span asp-validation-for="ClassName" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="TrainerId" class="form-label font-montserrat text-warning fw-bold text-uppercase" style="letter-spacing: 1px;">Select Trainer</label>
+                            <select asp-for="TrainerId" class="form-select input-hologram font-montserrat p-3" asp-items="ViewBag.TrainerId"></select>
+                            <span asp-validation-for="TrainerId" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-12 mb-4">
+                            <label asp-for="ScheduleTime" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Schedule Time</label>
+                            <input asp-for="ScheduleTime" class="form-control input-hologram font-montserrat p-3" type="datetime-local" required />
+                            <span asp-validation-for="ScheduleTime" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-12 mb-4">
+                            <label asp-for="Description" class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;">Description</label>
+                            <textarea asp-for="Description" class="form-control input-hologram font-montserrat p-3" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-12 mb-4">
+                            <label asp-for="VideoUrl" class="form-label font-montserrat text-warning fw-bold text-uppercase" style="letter-spacing: 1px;">YouTube Video URL</label>
+                            <input asp-for="VideoUrl" class="form-control input-hologram font-montserrat p-3" />
+                            <span asp-validation-for="VideoUrl" class="text-danger font-montserrat small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-12 mb-4 border-top border-secondary pt-4 mt-2">
+                            <label class="form-label font-montserrat text-crisp-white fw-bold text-uppercase" style="letter-spacing: 1px;"> Upload NEW Main Cover Photo</label>
+                            <input type="file" name="mainPhoto" class="form-control input-hologram font-montserrat p-3" accept=".jpg, .jpeg, .png" />
+                            <small class="text-muted font-montserrat fw-bold mt-1 d-block">Leave empty to keep the current photo.</small>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label font-montserrat text-secondary fw-bold text-uppercase" style="letter-spacing: 1px;">NEW Extra Photo 1</label>
+                            <input type="file" name="extraPhoto1" class="form-control input-hologram font-montserrat p-3" accept=".jpg, .jpeg, .png" />
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label font-montserrat text-secondary fw-bold text-uppercase" style="letter-spacing: 1px;">NEW Extra Photo 2</label>
+                            <input type="file" name="extraPhoto2" class="form-control input-hologram font-montserrat p-3" accept=".jpg, .jpeg, .png" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top border-secondary">
+                        <button type="submit" class="font-bebas btn btn-warning fs-3 px-5 py-2 flex-grow-1" style="letter-spacing: 2px;">Save Changes</button>
+                        <a asp-action="Index" class="font-bebas btn btn-outline-light fs-3 px-5 py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,228 @@
+@model IEnumerable<LiftAndAesthetics.Models.Review>
+
+@{
+    ViewData["Title"] = "Community Reviews";
+    var currentCategory = ViewBag.CurrentCategory as string ?? "All";
+    bool isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+<div class="container-fluid text-center py-5 shadow-lg" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); border-bottom: 3px solid #0dcaf0;">
+    <h1 class="font-bebas display-2 text-uppercase text-crisp-white glitch-text" style="letter-spacing: 4px; text-shadow: 0 0 20px rgba(13, 202, 240, 0.5);"> Reviews</h1>
+    <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 text-uppercase" style="letter-spacing: 1px;">Community feedback, unfiltered and raw.</p>
+</div>
+
+<div class="container mt-5 mb-5">
+
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-5 pb-3 border-bottom border-secondary">
+        <a href="/Reviews?category=All" class="btn @(currentCategory == "All" ? "btn-info shadow-lg" : "btn-outline-info") font-bebas fs-4 px-4" style="letter-spacing: 1px;">ALL REVIEWS</a>
+        <a href="/Reviews?category=FitnessClasses" class="btn @(currentCategory == "FitnessClasses" ? "btn-danger shadow-lg" : "btn-outline-danger") font-bebas fs-4 px-4" style="letter-spacing: 1px;">CLASSES</a>
+        <a href="/Reviews?category=Trainers" class="btn @(currentCategory == "Trainers" ? "btn-primary shadow-lg" : "btn-outline-primary") font-bebas fs-4 px-4" style="letter-spacing: 1px;">TRAINERS</a>
+        <a href="/Reviews?category=Shop" class="btn @(currentCategory == "Shop" ? "btn-warning shadow-lg" : "btn-outline-warning") font-bebas fs-4 px-4" style="letter-spacing: 1px;">SHOP & GEAR</a>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-4">
+            <div class="card-cyber-glow bg-black p-4 sticky-top" style="border-top: 5px solid #0dcaf0; top: 100px;">
+
+                <h3 class="font-bebas text-info mb-4" style="letter-spacing: 2px;">
+                    @(isAdmin ? "WRITE AN ANNOUNCEMENT" : "LEAVE A LOG")
+                </h3>
+
+                @if (!isAuthenticated)
+                {
+                    <div class="alert alert-dark border border-secondary text-center p-4 shadow-sm">
+                        <p class="font-bebas  fs-4 px-4 w-100 btn-firework" style="letter-spacing: 1px">You must be part of the elite to share your experience.</p>
+                        <a href="/Auth" class="font-bebas btn btn-liquid fs-4 px-4 w-100 btn-firework" style="letter-spacing: 1px;"> USER PORTAL</a>
+                    </div>
+                }
+                else
+                {
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="font-montserrat text-secondary fw-bold small text-uppercase">Target Category</label>
+                            <select name="TargetCategory" class="form-select input-hologram font-montserrat fw-bold bg-dark text-white" required>
+                                <option value="FitnessClasses">Classes</option>
+                                <option value="Trainers">Trainers</option>
+                                <option value="Shop">Shop & Gear</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="font-montserrat text-warning fw-bold small text-uppercase">Rating (1-5)</label>
+                            <select name="Rating" class="form-select input-hologram border-warning font-montserrat fw-bold bg-dark text-warning" required>
+                                <option value="5"> (Excellent)</option>
+                                <option value="4"> (Good)</option>
+                                <option value="3"> (Average)</option>
+                                <option value="2"> (Needs Work)</option>
+                                <option value="1"> (Poor)</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="font-montserrat text-secondary fw-bold small text-uppercase">Your Comment</label>
+                            <textarea name="Comment" class="form-control input-hologram bg-dark text-white" rows="4" placeholder="How was your experience?" required maxlength="1000"></textarea>
+                        </div>
+
+                        <button type="submit" class="font-bebas btn btn-outline-info w-100 fs-4 btn-firework">
+                            @(isAdmin ? "POST ANNOUNCEMENT" : "POST REVIEW")
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-dark border border-info text-center p-5 rounded-4 shadow-lg card-cyber-glow">
+                    <h1 class="display-1 text-info mb-3"></h1>
+                    <p class="font-montserrat text-secondary fw-bold fs-5">No logs found for this category yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-4">
+                    @foreach (var review in Model)
+                    {
+                        bool isAuthor = isAuthenticated && review.Member?.Email == User.Identity?.Name;
+                        string authorName = review.Member?.Name ?? "Athlete";
+                        string badgeColor = review.TargetCategory switch
+                        {
+                            "FitnessClasses" => "bg-danger",
+                            "Trainers" => "bg-primary",
+                            "Shop" => "bg-warning text-dark",
+                            "Nutrition" => "bg-success",
+                            _ => "bg-secondary"
+                        };
+
+                        <div class="card-cyber-glow bg-black p-4 border border-secondary rounded-4 position-relative">
+
+                            <div class="d-flex justify-content-between align-items-start mb-3 border-bottom border-dark pb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@(string.IsNullOrEmpty(review.Member?.ProfilePictureUrl) ? $"https://ui-avatars.com/api/?name={authorName}&background=222&color=fff" : review.Member.ProfilePictureUrl)"
+                                         class="rounded-circle border border-info" style="width: 50px; height: 50px; object-fit: cover;" />
+                                    <div>
+                                        <h5 class="font-bebas text-white mb-0 fs-4" style="letter-spacing: 1px;">@authorName</h5>
+                                        <div class="text-warning fs-6">
+                                            @for (int i = 0; i < review.Rating; i++)
+                                            {
+                                                <span></span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge @badgeColor font-bebas fs-6 px-3 shadow-sm mb-1">@review.TargetCategory.ToUpper()</span>
+                                    <div class="text-muted font-montserrat fw-bold" style="font-size: 0.75rem;">@review.CreatedAt.ToString("dd MMM yyyy")</div>
+                                </div>
+                            </div>
+
+                            <p class="font-montserrat text-crisp-white fw-bold fs-5 opacity-75 mb-4">
+                                "@review.Comment"
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(review.AdminReply))
+                            {
+                                <div class="mt-3 p-3 rounded" style="background: rgba(255, 193, 7, 0.05); border-left: 4px solid #ffc107;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="font-bebas text-warning" style="letter-spacing: 1px;"> SYSTEM RESPONSE (ADMIN)</span>
+                                        <small class="text-muted font-montserrat fw-bold" style="font-size: 0.7rem;">@review.ReplyDate?.ToString("dd MMM yyyy")</small>
+                                    </div>
+                                    <p class="font-montserrat text-white mb-0 fw-bold fs-6 opacity-75">
+                                        @review.AdminReply
+                                    </p>
+                                </div>
+                            }
+
+                            @if (isAuthor || isAdmin)
+                            {
+                                <div class="mt-3 pt-3 border-top border-dark d-flex justify-content-end gap-2">
+                                    @if (isAdmin)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-warning font-bebas px-3" data-bs-toggle="modal" data-bs-target="#replyModal-@review.ReviewId">REPLY</button>
+                                    }
+
+                                    @if (isAuthor)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-info font-bebas px-3" data-bs-toggle="modal" data-bs-target="#editModal-@review.ReviewId">EDIT</button>
+                                    }
+
+                                    <form asp-action="Delete" method="post" class="m-0 p-0" onsubmit="return confirm('Wipe this log from the system?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@review.ReviewId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger font-bebas px-3">DELETE</button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+
+                        @if (isAuthor)
+                        {
+                            <div class="modal fade" id="editModal-@review.ReviewId" tabindex="-1" data-bs-theme="dark">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content bg-black border-info card-cyber-glow">
+                                        <div class="modal-header border-secondary">
+                                            <h5 class="modal-title font-bebas text-info fs-3">EDIT LOG</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form asp-action="Edit" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <div class="modal-body">
+                                                <input type="hidden" name="id" value="@review.ReviewId" />
+                                                <div class="mb-3">
+                                                    <label class="font-montserrat text-warning fw-bold small text-uppercase">New Rating</label>
+                                                    <select name="rating" class="form-select input-hologram bg-dark text-warning">
+                                                        <option value="5" selected="@(review.Rating == 5)"> (Excellent)</option>
+                                                        <option value="4" selected="@(review.Rating == 4)"> (Good)</option>
+                                                        <option value="3" selected="@(review.Rating == 3)"> (Average)</option>
+                                                        <option value="2" selected="@(review.Rating == 2)"> (Needs Work)</option>
+                                                        <option value="1" selected="@(review.Rating == 1)"> (Poor)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="font-montserrat text-secondary fw-bold small text-uppercase">Update Comment</label>
+                                                    <textarea name="comment" class="form-control input-hologram bg-dark text-white" rows="3" required>@review.Comment</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-secondary">
+                                                <button type="button" class="btn btn-outline-light font-bebas px-4" data-bs-dismiss="modal">CANCEL</button>
+                                                <button type="submit" class="btn btn-info font-bebas px-4">SAVE CHANGES</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (isAdmin)
+                        {
+                            <div class="modal fade" id="replyModal-@review.ReviewId" tabindex="-1" data-bs-theme="dark">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content bg-black border-warning card-cyber-glow">
+                                        <div class="modal-header border-secondary">
+                                            <h5 class="modal-title font-bebas text-warning fs-3">SYSTEM REPLY</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form asp-action="Reply" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <div class="modal-body">
+                                                <input type="hidden" name="id" value="@review.ReviewId" />
+                                                <div class="mb-3">
+                                                    <label class="font-montserrat text-warning fw-bold small text-uppercase">Admin Response</label>
+                                                    <textarea name="adminReply" class="form-control input-hologram bg-dark text-white border-warning" rows="3" required placeholder="Type official response here...">@review.AdminReply</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-secondary">
+                                                <button type="submit" class="btn btn-warning text-dark font-bebas px-4 w-100">TRANSMIT OVERRIDE</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

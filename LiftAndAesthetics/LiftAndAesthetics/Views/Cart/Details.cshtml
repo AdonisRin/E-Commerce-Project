@@ -1,0 +1,41 @@
+﻿@model LiftAndAesthetics.Models.CartItem
+
+@{
+    ViewData["Title"] = "Cart Item Details";
+}
+
+<div class="container mt-5 mb-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="p-5 rounded-4 shadow-lg text-center card-cyber-glow" style="background: #0a0a0a; border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+                <div class="position-absolute top-0 start-50 translate-middle">
+                    <span class="badge bg-danger border border-dark rounded-pill px-4 py-2 fs-5 font-bebas shadow-sm" style="letter-spacing: 1px;">CART ITEM</span>
+                </div>
+
+                <div class="d-flex justify-content-center mb-4 mt-3">
+                    <div class="p-4 bg-white rounded-4 shadow-lg" style="width: 100%; height: 250px; border: 3px solid #dc3545;">
+                        <img src="@(string.IsNullOrEmpty(Model.Product?.ImageUrl) ? "https://via.placeholder.com/300/111/dc3545?text=Product" : Model.Product.ImageUrl)"
+                             class="img-fluid w-100 h-100 img-zoom-extreme" style="object-fit: contain;" alt="@Model.Product?.Name">
+                    </div>
+                </div>
+
+                <h1 class="font-bebas text-crisp-white text-uppercase mb-2 text-hologram" style="font-size: 3rem; letter-spacing: 2px;">@(Model.Product?.Name ?? "Unknown")</h1>
+
+                <h2 class="font-bebas text-neon-red mb-4 text-hologram" style="font-size: 2.5rem; letter-spacing: 1px;">@(Model.Product?.Price.ToString("0.00") ?? "0.00") <span class="fs-4 text-secondary">LEI</span></h2>
+
+                <div class="bg-dark p-4 rounded-4 border border-secondary text-center mb-4 mx-auto" style="max-width: 300px;">
+                    <h3 class="font-montserrat text-crisp-white fs-4 mb-0">
+                        <strong class="text-secondary">Quantity:</strong> <span class="text-neon-red fw-bold">@Model.Quantity</span>
+                    </h3>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-action="Edit" asp-route-id="@Model.CartItemId" class="font-bebas btn btn-warning fs-4 px-4 text-dark">Edit Qty</a>
+                    <a asp-action="Index" class="font-bebas btn btn-outline-light fs-4 px-4">Back to Cart</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

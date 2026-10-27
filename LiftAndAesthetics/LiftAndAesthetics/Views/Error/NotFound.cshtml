@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "SYSTEM ERROR DETECTED";
+    Layout = "_Layout";
+    string errorName = ViewBag.ErrorMessage ?? "CRITICAL_FAILURE";
+    string errorDesc = ViewBag.Description ?? "BRO, YOU ARE NOT SUPPOSED TO BE HERE.";
+}
+
+<style>
+    body {
+        background-color: #050505 !important;
+        color: #fff !important;
+    }
+
+    .error-container {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .huge-404 {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 12rem;
+        color: #dc3545;
+        text-shadow: 0 0 30px rgba(220, 53, 69, 0.8);
+        letter-spacing: 5px;
+        line-height: 1;
+    }
+</style>
+
+<div class="container error-container mt-5 mb-5">
+    <div class="p-5 rounded-4 shadow-lg card-cyber-glow" style="background: #111; border: 1px solid #333; border-top: 5px solid #dc3545;">
+
+        <h1 class="huge-404 mb-0">404</h1>
+
+        <div class="mb-4 pt-3 border-top border-dark">
+            <span class="font-bebas text-danger border border-danger px-3 py-1 fs-5" style="letter-spacing: 2px;">
+                  @errorName
+            </span>
+        </div>
+
+        <p class="font-montserrat lead fw-bold text-crisp-white opacity-75 mb-5 text-uppercase" style="letter-spacing: 2px; max-width: 600px;">
+            "@errorDesc"
+        </p>
+
+        <a href="/" class="font-bebas btn btn-outline-info fs-2 px-5 py-3 shadow-lg" style="letter-spacing: 3px;">
+            REBOOT TO SYSTEM_HOME
+        </a>
+
+        <div class="mt-4 font-montserrat small text-secondary fw-bold text-uppercase" style="letter-spacing: 1px;">
+            Lift and Aesthetics.
+        </div>
+    </div>
+</div>
