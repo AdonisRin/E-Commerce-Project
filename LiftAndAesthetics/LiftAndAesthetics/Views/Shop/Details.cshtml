@@ -1,67 +1,271 @@
-@model LiftAndAesthetics.Models.Product
+@model LiftAndAesthetics.ViewModels.ProductDetailsViewModel
 
 @{
-    ViewData["Title"] = "Product Details";
+    ViewData["Title"] = $"{Model.Product.Name} - Product Details";
 }
 
-<div class="container mt-5 mb-5 pt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
-            <div class="p-4 p-md-5 rounded-3 shadow-sm text-center" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #dc3545;">
+<div class="container mt-5 mb-5 pt-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb font-montserrat small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-danger text-decoration-none">Shop</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index" asp-route-category="@Model.Product.Category" class="text-secondary text-decoration-none">@Model.Product.Category</a></li>
+            <li class="breadcrumb-item active text-light" aria-current="page">@Model.Product.Name</li>
+        </ol>
+    </nav>
 
-                <div class="d-flex justify-content-center mb-4">
-                    <div class="p-3 bg-white rounded-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 100%; height: 280px; border: 1px solid #dee2e6;">
-                        <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://via.placeholder.com/300/111/dc3545?text=Product" : Model.ImageUrl)"
-                             class="img-fluid" style="max-height: 250px; object-fit: contain;" alt="@Model.Name">
+    <!-- Main Product Card -->
+    <div class="row g-4 justify-content-center">
+        <!-- Image Gallery Col -->
+        <div class="col-12 col-md-5">
+            <div class="p-4 rounded-3 text-center h-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background: #141721; border: 1px solid #282e3e; min-height: 380px;">
+                <img src="@(string.IsNullOrEmpty(Model.Product.ImageUrl) ? "https://via.placeholder.com/400/111/dc3545?text=Product" : Model.Product.ImageUrl)"
+                     class="img-fluid rounded" style="max-height: 320px; object-fit: contain;" alt="@Model.Product.Name"
+                     onerror="this.src='https://via.placeholder.com/400/111/dc3545?text=Product';">
+
+                <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-3 py-2 font-bebas fs-6" style="letter-spacing: 1px;">
+                    @Model.Product.Category
+                </span>
+            </div>
+        </div>
+
+        <!-- Product Info Col -->
+        <div class="col-12 col-md-7">
+            <div class="p-4 p-md-5 rounded-3 h-100 d-flex flex-column" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #dc3545;">
+                <h1 class="font-bebas text-white text-uppercase mb-2" style="font-size: 2.5rem; letter-spacing: 1px; line-height: 1.1;">
+                    @Model.Product.Name
+                </h1>
+
+                <!-- Rating Header (B3) -->
+                <div class="d-flex align-items-center gap-3 mb-3 font-montserrat">
+                    <span class="text-warning fw-bold fs-5">Rating: @Model.AverageRating.ToString("0.0") / 5</span>
+                    <span class="small" style="color: #cbd5e1;">(@Model.ReviewCount verified reviews)</span>
+                </div>
+
+                <!-- Price & Stock Availability (A1, A7) -->
+                <div class="d-flex align-items-baseline gap-3 mb-4 border-bottom pb-3" style="border-color: #242938 !important;">
+                    <div class="font-bebas text-danger display-5" style="letter-spacing: 1px;">
+                        @Model.Product.Price.ToString("0.00") <span class="fs-4 text-white-50">LEI</span>
+                    </div>
+                    <div>
+                        @if (Model.Product.StockQuantity > 0)
+                        {
+                            <span class="badge bg-success font-montserrat px-3 py-2 fs-6">
+                                In Stock (@Model.Product.StockQuantity units ready to ship)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary font-montserrat px-3 py-2 fs-6">
+                                Out of Stock
+                            </span>
+                        }
                     </div>
                 </div>
 
-                <h1 class="font-bebas text-white text-uppercase mb-2" style="font-size: 2.8rem; letter-spacing: 2px;">@Model.Name</h1>
-
-                <h2 class="font-bebas text-danger mb-4" style="font-size: 2.4rem; letter-spacing: 1px;">@Model.Price <span class="fs-4 text-secondary">LEI</span></h2>
-
-                <div class="p-3 p-md-4 rounded-3 text-start mb-4" style="background: #10131a; border: 1px solid #242938;">
-                    <p class="font-montserrat text-light fs-6 mb-3 border-bottom pb-2" style="border-color: #242938 !important;">
-                        <strong class="text-danger">Category:</strong> <br />
-                        <span class="opacity-75">@Model.Category</span>
+                <!-- Product Specifications -->
+                <div class="mb-4 font-montserrat">
+                    <p class="text-white fs-6 mb-3 fw-normal" style="color: #f1f5f9 !important;">
+                        @(string.IsNullOrEmpty(Model.Product.Description) ? "Athletic grade performance product engineered for high intensity gym sessions." : Model.Product.Description)
                     </p>
-                    <p class="font-montserrat text-light fs-6 mb-3 border-bottom pb-2" style="border-color: #242938 !important;">
-                        <strong class="text-danger">Availability:</strong> <br />
-                        <span class="badge bg-success fs-6 mt-1 px-3 py-1 fw-bold font-montserrat">In Stock - Ready to Ship</span>
-                    </p>
-                    <p class="font-montserrat text-light fs-6 mb-3 border-bottom pb-2" style="border-color: #242938 !important;">
-                        <strong class="text-danger">Description:</strong> <br />
-                        <span class="opacity-75">@(string.IsNullOrEmpty(Model.Description) ? "Quality fitness nutrition and training product." : Model.Description)</span>
-                    </p>
-                    <p class="font-montserrat text-light fs-6 mb-0">
-                        <strong class="text-danger">Product SKU:</strong> <br />
-                        <span class="opacity-75">#LIFT-@Model.ProductId</span>
-                    </p>
+                    <div class="small fw-semibold" style="color: #cbd5e1;">
+                        <div><strong class="text-white">SKU:</strong> #LIFT-@Model.Product.ProductId</div>
+                        <div><strong class="text-white">Added:</strong> @Model.Product.CreatedAt.ToString("dd MMM yyyy")</div>
+                    </div>
                 </div>
 
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <!-- CTA Actions -->
+                <div class="d-flex gap-2 flex-wrap mt-auto pt-3 border-top" style="border-color: #242938 !important;">
                     @if (!User.IsInRole("Admin"))
                     {
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
-                                <input type="hidden" name="productId" value="@Model.ProductId" />
-                                <button type="submit" class="font-bebas btn btn-danger fs-4 px-5 py-2 text-uppercase" style="letter-spacing: 1px;">Add to Cart</button>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="flex-grow-1">
+                                <input type="hidden" name="productId" value="@Model.Product.ProductId" />
+                                <button type="submit" class="btn btn-danger font-bebas fs-4 w-100 py-2" @(Model.Product.StockQuantity <= 0 ? "disabled" : "") style="letter-spacing: 1px;">
+                                    Add to Cart
+                                </button>
+                            </form>
+
+                            <!-- Wishlist Toggle (B7) -->
+                            <form asp-controller="Wishlist" asp-action="@(Model.IsInWishlist ? "Remove" : "Add")" method="post">
+                                <input type="hidden" name="productId" value="@Model.Product.ProductId" />
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                <button type="submit" class="btn @(Model.IsInWishlist ? "btn-danger" : "btn-outline-danger") font-bebas fs-4 px-4 py-2" style="letter-spacing: 1px;">
+                                    @(Model.IsInWishlist ? "In Wishlist" : "Save to Wishlist")
+                                </button>
                             </form>
                         }
                         else
                         {
-                            <a href="/Auth" class="font-bebas btn btn-outline-danger fs-4 px-5 py-2 text-uppercase" style="letter-spacing: 1px;">Log in to Buy</a>
+                            <a href="/Auth" class="btn btn-outline-danger font-bebas fs-4 px-5 py-2 flex-grow-1" style="letter-spacing: 1px;">Log In to Purchase</a>
                         }
                     }
-                    @if (User.IsInRole("Admin"))
+                    else
                     {
-                        <a asp-action="Edit" asp-route-id="@Model.ProductId" class="font-bebas btn btn-outline-warning fs-4 px-4 py-2">Edit Product</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Product.ProductId" class="btn btn-outline-warning font-bebas fs-4 px-4 py-2">Edit Product</a>
                     }
-                    <a asp-action="Index" class="font-bebas btn btn-outline-light fs-4 px-4 py-2">Back to Shop</a>
+                    <a asp-action="Index" class="btn btn-outline-light font-bebas fs-4 px-4 py-2">Back to Shop</a>
                 </div>
-
             </div>
         </div>
+    </div>
+
+    <!-- Recommendations Section (B2) -->
+    @if (Model.FrequentlyBoughtTogether.Any() || Model.SimilarProducts.Any())
+    {
+        <div class="mt-5 pt-4 border-top" style="border-color: #242938 !important;">
+            @if (Model.FrequentlyBoughtTogether.Any())
+            {
+                <div class="mb-5">
+                    <h3 class="font-bebas text-white fs-2 mb-3 text-uppercase" style="letter-spacing: 1px;">
+                        Frequently Bought Together
+                    </h3>
+                    <p class="font-montserrat small text-secondary mb-3">Athletes who purchased @Model.Product.Name also paired it with these items:</p>
+                    
+                    <div class="row g-3">
+                        @foreach (var rec in Model.FrequentlyBoughtTogether)
+                        {
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100 border-0 p-3" style="background: #141721; border-left: 3px solid #dc3545 !important; border-radius: 6px;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="@(string.IsNullOrEmpty(rec.ImageUrl) ? "https://via.placeholder.com/100/111/dc3545" : rec.ImageUrl)"
+                                             style="width: 70px; height: 70px; object-fit: contain; background: #0f1219;" alt="@rec.Name" />
+                                        <div>
+                                            <h5 class="font-bebas text-white mb-1 fs-5">
+                                                <a asp-action="Details" asp-route-id="@rec.ProductId" class="text-white text-decoration-none">@rec.Name</a>
+                                            </h5>
+                                            <div class="font-bebas text-danger fs-5">@rec.Price.ToString("0.00") LEI</div>
+                                            <a asp-action="Details" asp-route-id="@rec.ProductId" class="btn btn-sm btn-outline-light font-montserrat mt-1" style="font-size: 0.75rem;">View</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (Model.SimilarProducts.Any())
+            {
+                <div class="mb-4">
+                    <h3 class="font-bebas text-white fs-2 mb-3 text-uppercase" style="letter-spacing: 1px;">
+                        Similar Products in @Model.Product.Category
+                    </h3>
+                    <div class="row g-3">
+                        @foreach (var sim in Model.SimilarProducts)
+                        {
+                            <div class="col-6 col-md-3">
+                                <div class="card h-100 border-0 p-3 text-center" style="background: #141721; border: 1px solid #242938; border-radius: 6px;">
+                                    <img src="@(string.IsNullOrEmpty(sim.ImageUrl) ? "https://via.placeholder.com/150/111/dc3545" : sim.ImageUrl)"
+                                         style="height: 120px; object-fit: contain; background: #0f1219; border-radius: 4px;" class="mb-2" alt="@sim.Name" />
+                                    <h6 class="font-bebas text-white mb-1 fs-5 text-truncate">@sim.Name</h6>
+                                    <div class="font-bebas text-danger fs-5 mb-2">@sim.Price.ToString("0.00") LEI</div>
+                                    <a asp-action="Details" asp-route-id="@sim.ProductId" class="btn btn-sm btn-outline-light font-bebas fs-6">View Details</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Verified Customer Reviews Section (B3) -->
+    <div class="mt-5 pt-4 border-top" style="border-color: #242938 !important;">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h3 class="font-bebas text-white fs-2 mb-0 text-uppercase" style="letter-spacing: 1px;">
+                    Customer Reviews (@Model.ReviewCount)
+                </h3>
+                <div class="text-secondary font-montserrat small">Average Rating: <strong>@Model.AverageRating.ToString("0.0")</strong> out of 5</div>
+            </div>
+        </div>
+
+        <!-- Add Review Form (Only for verified purchasers) -->
+        @if (Model.CanUserReview)
+        {
+            <div class="p-4 rounded-3 mb-4" style="background: #141721; border: 1px solid #282e3e; border-left: 4px solid #28a745;">
+                <h4 class="font-bebas text-white fs-4 mb-2" style="letter-spacing: 1px;">Leave a Verified Review</h4>
+                <p class="font-montserrat small text-secondary mb-3">You purchased this product! Share your real workout and quality feedback with other lifters.</p>
+
+                <form asp-action="AddReview" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Product.ProductId" />
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label text-light font-montserrat small fw-bold">Rating (1 to 5 Stars)</label>
+                            <select name="rating" class="form-select bg-dark text-white border-secondary">
+                                <option value="5" selected>5 - Excellent</option>
+                                <option value="4">4 - Very Good</option>
+                                <option value="3">3 - Average</option>
+                                <option value="2">2 - Below Average</option>
+                                <option value="1">1 - Poor</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <label class="form-label text-light font-montserrat small fw-bold">Your Review</label>
+                            <textarea name="comment" rows="2" class="form-control bg-dark text-white border-secondary" placeholder="Write honest feedback about quality, mixability, fit or durability..." required></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-danger font-bebas fs-5 px-4" style="letter-spacing: 1px;">
+                                Submit Verified Review
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="p-3 rounded-3 mb-4 font-montserrat small text-secondary" style="background: #10131a; border: 1px solid #242938;">
+                <strong class="text-light">Verified Purchaser Policy:</strong> Only customers who have purchased and completed payment for this product can post a review. If you bought this product, log in with that account to leave your feedback.
+            </div>
+        }
+
+        <!-- Reviews List -->
+        @if (!Model.Reviews.Any())
+        {
+            <div class="p-4 text-center rounded text-secondary font-montserrat small" style="background: #141721; border: 1px dashed #303749;">
+                No reviews yet for this product. Be the first customer to purchase and share your experience!
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var review in Model.Reviews)
+                {
+                    <div class="p-4 rounded-3 text-white" style="background: #141721; border: 1px solid #242938;">
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="font-bebas text-white fs-5">@(review.Member?.Name ?? "Verified Athlete")</span>
+                                <span class="badge bg-secondary font-montserrat" style="font-size: 0.7rem;">Verified Buyer</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-warning font-montserrat fw-bold">Rating: @review.Rating / 5</span>
+                                <span class="text-secondary font-montserrat small">@review.CreatedAt.ToString("dd MMM yyyy")</span>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form asp-action="ToggleHideReview" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                        <input type="hidden" name="returnProductId" value="@Model.Product.ProductId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-warning font-montserrat" style="font-size: 0.7rem;">
+                                            @(review.IsHidden ? "Show Review" : "Hide Review")
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+
+                        <p class="font-montserrat text-light opacity-90 mb-0">
+                            @review.Comment
+                        </p>
+                    </div>
+                }
+            </div>
+        }
     </div>
 </div>
