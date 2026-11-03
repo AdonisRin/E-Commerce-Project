@@ -168,10 +168,15 @@ namespace LiftAndAesthetics.Data
 
             var usersToCreate = new[]
             {
-                new { Email = "admin@lift.com", Name = "Zeus ", Role = "Admin", Wallet = 99999.00m, Pic = "/photos/david.jpg" },
-                new { Email = "alex@lift.com", Name = "Alex ", Role = "Admin", Wallet = 5000.00m, Pic = "/photos/alex.jpg" },
-                new { Email = "athlete@lift.com", Name = "Chad Gymbro", Role = "User", Wallet = 6767.00m, Pic = "/photos/david.jpg" },
-                new { Email = "girl@lift.com", Name = "Gym Girl", Role = "User", Wallet = 6767.00m, Pic = "/photos/maria.jpg" }
+                new { Email = "admin@lift.com", Name = "Zeus ", Role = "Admin", Wallet = 99999.00m, Pic = "/photos/david.jpg", Address = "Strada Victoriei Nr. 42, Craiova" },
+                new { Email = "alex@lift.com", Name = "Alex ", Role = "Admin", Wallet = 5000.00m, Pic = "/photos/alex.jpg", Address = "Strada Victoriei Nr. 42, Craiova" },
+                new { Email = "athlete@lift.com", Name = "Chad Gymbro", Role = "User", Wallet = 6767.00m, Pic = "/photos/david.jpg", Address = "Strada Victoriei Nr. 42, Craiova" },
+                new { Email = "girl@lift.com", Name = "Gym Girl", Role = "User", Wallet = 6767.00m, Pic = "/photos/maria.jpg", Address = "Bulevardul 1 Mai Nr. 15, Craiova" },
+
+                // GitHub Team Accounts (A4, B6)
+                new { Email = "dariusploae@yahoo.com", Name = "Darius Adonis Ionut", Role = "Admin", Wallet = 15000.00m, Pic = "/photos/david.jpg", Address = "Strada Victoriei Nr. 42, Craiova" },
+                new { Email = "peca.ana.p2f@student.ucv.ro", Name = "Peca Ana Maria Cristina", Role = "User", Wallet = 5000.00m, Pic = "/photos/maria.jpg", Address = "Bulevardul Decebal Nr. 12, Craiova" },
+                new { Email = "nica.david.p7c@student.ucv.ro", Name = "Nica David Andrei", Role = "User", Wallet = 5000.00m, Pic = "/photos/alex.jpg", Address = "Strada Nicolae Titulescu Nr. 8, Craiova" }
             };
 
             foreach (var u in usersToCreate)
@@ -194,7 +199,8 @@ namespace LiftAndAesthetics.Data
                                 Password = identityUser.PasswordHash,
                                 Role = u.Role,
                                 WalletBalance = u.Wallet,
-                                ProfilePictureUrl = u.Pic
+                                ProfilePictureUrl = u.Pic,
+                                Address = u.Address
                             });
                         }
                     }
@@ -204,50 +210,130 @@ namespace LiftAndAesthetics.Data
 
 
 
-            if (!context.Reviews.Any())
+            // Ensure products have StockQuantity and CreatedAt populated
+            var allProducts = context.Products.ToList();
+            bool productsUpdated = false;
+            foreach (var p in allProducts)
             {
-                var chad = context.Members.FirstOrDefault(m => m.Email == "athlete@lift.com");
-                var gymGirl = context.Members.FirstOrDefault(m => m.Email == "girl@lift.com");
-                var zeus = context.Members.FirstOrDefault(m => m.Email == "admin@lift.com");
-
-                if (chad != null && gymGirl != null && zeus != null)
+                if (p.StockQuantity <= 0)
                 {
-                    context.Reviews.AddRange(
-                         new Review
-                         {
-                             MemberId = chad.MemberId,
-                             TargetCategory = "Shop",
-                             Rating = 5,
-                             Comment = "The protein bars taste like cardboard, but the pump is insane.",
-                             CreatedAt = DateTime.Now.AddDays(-2)
-                         },
-                         new Review
-                         {
-                             MemberId = gymGirl.MemberId,
-                             TargetCategory = "Trainers",
-                             Rating = 4,
-                             Comment = "Trainer Alex made me do exercises until I saw stars. Great workout, but I hate him so much.",
-                             CreatedAt = DateTime.Now.AddDays(-5)
-                         },
-                         new Review
-                         {
-                             MemberId = chad.MemberId,
-                             TargetCategory = "FitnessClasses",
-                             Rating = 2,
-                             Comment = "Hot water died exactly when I hit the showers after cardio class... other than that, it's all good.",
-                             CreatedAt = DateTime.Now.AddDays(-10),
-                             AdminReply = "A pipe burst on the 2nd floor but it's fixed now . See you at the gym!",
-                             ReplyDate = DateTime.Now.AddDays(-9)
-                         },
-                         new Review
-                         {
-                             MemberId = zeus.MemberId,
-                             TargetCategory = "Shop",
-                             Rating = 1,
-                             Comment = "Whoever left the 50KG dumbbells on the floor is getting INSTA BANNED. Don't make me check the security cams.",
-                             CreatedAt = DateTime.Now.AddHours(-3)
-                         }
-                     );
+                    p.StockQuantity = 35;
+                    productsUpdated = true;
+                }
+                if (p.CreatedAt == default)
+                {
+                    p.CreatedAt = DateTime.Now.AddDays(-14);
+                    productsUpdated = true;
+                }
+            }
+            if (productsUpdated)
+            {
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Discount Codes (B5)
+            if (!context.DiscountCodes.Any())
+            {
+                context.DiscountCodes.AddRange(
+                    new DiscountCode
+                    {
+                        Code = "LIFT10",
+                        DiscountType = "Percentage",
+                        Value = 10,
+                        ExpiryDate = DateTime.Now.AddYears(1),
+                        MaxUses = 100,
+                        TimesUsed = 2,
+                        IsActive = true
+                    },
+                    new DiscountCode
+                    {
+                        Code = "AESTHETICS20",
+                        DiscountType = "Percentage",
+                        Value = 20,
+                        ExpiryDate = DateTime.Now.AddYears(1),
+                        MaxUses = 50,
+                        TimesUsed = 0,
+                        IsActive = true
+                    },
+                    new DiscountCode
+                    {
+                        Code = "WELCOME25",
+                        DiscountType = "FixedAmount",
+                        Value = 25.00m,
+                        ExpiryDate = DateTime.Now.AddYears(1),
+                        MaxUses = 200,
+                        TimesUsed = 5,
+                        IsActive = true
+                    }
+                );
+                await context.SaveChangesAsync();
+            }
+
+            // Ensure test users have saved delivery address (A4)
+            var chadUser = context.Members.FirstOrDefault(m => m.Email == "athlete@lift.com");
+            if (chadUser != null && string.IsNullOrEmpty(chadUser.Address))
+            {
+                chadUser.Address = "Strada Victoriei Nr. 42, Craiova";
+                await context.SaveChangesAsync();
+            }
+
+            // Seed sample orders & product-specific reviews (A8, B2, B3, B4)
+            if (!context.Orders.Any() && chadUser != null && allProducts.Any())
+            {
+                var prod1 = allProducts.First();
+                var prod2 = allProducts.Skip(1).FirstOrDefault() ?? prod1;
+
+                var sampleOrder = new Order
+                {
+                    OrderNumber = "ORD-20261025-1001",
+                    MemberId = chadUser.MemberId,
+                    OrderDate = DateTime.Now.AddDays(-3),
+                    CustomerName = chadUser.Name,
+                    CustomerEmail = chadUser.Email,
+                    DeliveryAddress = "Strada Victoriei Nr. 42",
+                    DeliveryCity = "Craiova",
+                    DeliveryMethod = "Express Delivery",
+                    DeliveryCost = 25.00m,
+                    PaymentMethod = "Credit Card (Test)",
+                    Subtotal = prod1.Price + prod2.Price,
+                    DiscountAmount = 10.00m,
+                    DiscountCode = "LIFT10",
+                    TotalAmount = (prod1.Price + prod2.Price) - 10.00m + 25.00m,
+                    Status = "Paid",
+                    PaymentConfirmedAt = DateTime.Now.AddDays(-3)
+                };
+
+                sampleOrder.OrderItems.Add(new OrderItem
+                {
+                    ProductId = prod1.ProductId,
+                    Quantity = 1,
+                    UnitPrice = prod1.Price,
+                    TotalPrice = prod1.Price
+                });
+
+                sampleOrder.OrderItems.Add(new OrderItem
+                {
+                    ProductId = prod2.ProductId,
+                    Quantity = 1,
+                    UnitPrice = prod2.Price,
+                    TotalPrice = prod2.Price
+                });
+
+                context.Orders.Add(sampleOrder);
+                await context.SaveChangesAsync();
+
+                // Add product review from purchaser (B3)
+                if (!context.Reviews.Any(r => r.ProductId == prod1.ProductId))
+                {
+                    context.Reviews.Add(new Review
+                    {
+                        MemberId = chadUser.MemberId,
+                        ProductId = prod1.ProductId,
+                        TargetCategory = "Shop",
+                        Rating = 5,
+                        Comment = "Outstanding quality and mixability. Noticeable increase in recovery speed after heavy sets.",
+                        CreatedAt = DateTime.Now.AddDays(-2)
+                    });
                     await context.SaveChangesAsync();
                 }
             }

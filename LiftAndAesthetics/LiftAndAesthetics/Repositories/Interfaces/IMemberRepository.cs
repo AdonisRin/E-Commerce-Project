@@ -1,4 +1,4 @@
-﻿using LiftAndAesthetics.Models;
+using LiftAndAesthetics.Models;
 using System.Threading.Tasks;
 
 namespace LiftAndAesthetics.Repositories.Interfaces
@@ -6,6 +6,7 @@ namespace LiftAndAesthetics.Repositories.Interfaces
     public interface IMemberRepository : IRepositoryBase<Members>
     {
         Task<Members?> GetByEmailAsync(string email);
+        Task<Members?> GetByIdAsync(int id);
         Task<Members?> GetByCredentialsAsync(string email, string password);
         bool EmailExists(string email);
 

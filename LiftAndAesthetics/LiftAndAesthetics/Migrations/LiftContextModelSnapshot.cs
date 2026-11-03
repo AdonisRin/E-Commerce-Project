@@ -139,6 +139,44 @@ namespace LiftAndAesthetics.Migrations
                     b.ToTable("ContactMessages");
                 });
 
+            modelBuilder.Entity("LiftAndAesthetics.Models.DiscountCode", b =>
+                {
+                    b.Property<int>("DiscountCodeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DiscountCodeId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DiscountType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaxUses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimesUsed")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("DiscountCodeId");
+
+                    b.ToTable("DiscountCodes");
+                });
+
             modelBuilder.Entity("LiftAndAesthetics.Models.FitnessClass", b =>
                 {
                     b.Property<int>("FitnessClassId")
@@ -301,6 +339,121 @@ namespace LiftAndAesthetics.Migrations
                     b.ToTable("NutritionPlans");
                 });
 
+            modelBuilder.Entity("LiftAndAesthetics.Models.Order", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DeliveryAddress")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("DeliveryCity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("DeliveryCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DeliveryMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DiscountCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("PaymentConfirmedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TrackingNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("LiftAndAesthetics.Models.OrderItem", b =>
+                {
+                    b.Property<int>("OrderItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("OrderItemId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
+                });
+
             modelBuilder.Entity("LiftAndAesthetics.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -312,6 +465,9 @@ namespace LiftAndAesthetics.Migrations
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -325,6 +481,9 @@ namespace LiftAndAesthetics.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
 
                     b.HasKey("ProductId");
 
@@ -350,7 +509,13 @@ namespace LiftAndAesthetics.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Rating")
@@ -367,6 +532,8 @@ namespace LiftAndAesthetics.Migrations
                     b.HasKey("ReviewId");
 
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Reviews");
                 });
@@ -432,6 +599,32 @@ namespace LiftAndAesthetics.Migrations
                     b.HasIndex("MembershipId");
 
                     b.ToTable("UserMemberships");
+                });
+
+            modelBuilder.Entity("LiftAndAesthetics.Models.WishlistItem", b =>
+                {
+                    b.Property<int>("WishlistItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WishlistItemId"));
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("WishlistItemId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("WishlistItems");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -694,7 +887,7 @@ namespace LiftAndAesthetics.Migrations
                     b.Navigation("Membership");
                 });
 
-            modelBuilder.Entity("LiftAndAesthetics.Models.Review", b =>
+            modelBuilder.Entity("LiftAndAesthetics.Models.Order", b =>
                 {
                     b.HasOne("LiftAndAesthetics.Models.Members", "Member")
                         .WithMany()
@@ -703,6 +896,42 @@ namespace LiftAndAesthetics.Migrations
                         .IsRequired();
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("LiftAndAesthetics.Models.OrderItem", b =>
+                {
+                    b.HasOne("LiftAndAesthetics.Models.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LiftAndAesthetics.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("LiftAndAesthetics.Models.Review", b =>
+                {
+                    b.HasOne("LiftAndAesthetics.Models.Members", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LiftAndAesthetics.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId");
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("LiftAndAesthetics.Models.UserMembership", b =>
@@ -722,6 +951,25 @@ namespace LiftAndAesthetics.Migrations
                     b.Navigation("Member");
 
                     b.Navigation("Membership");
+                });
+
+            modelBuilder.Entity("LiftAndAesthetics.Models.WishlistItem", b =>
+                {
+                    b.HasOne("LiftAndAesthetics.Models.Members", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LiftAndAesthetics.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -790,6 +1038,11 @@ namespace LiftAndAesthetics.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("UserMemberships");
+                });
+
+            modelBuilder.Entity("LiftAndAesthetics.Models.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("LiftAndAesthetics.Models.Trainer", b =>

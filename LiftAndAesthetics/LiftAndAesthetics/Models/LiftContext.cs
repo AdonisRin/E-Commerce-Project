@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore; 
 namespace LiftAndAesthetics.Models
@@ -21,5 +21,9 @@ namespace LiftAndAesthetics.Models
         public DbSet<UserMembership> UserMemberships { get; set; }
         public DbSet<ChatMessage> ChatMessage { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<DiscountCode> DiscountCodes { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
     }
 }

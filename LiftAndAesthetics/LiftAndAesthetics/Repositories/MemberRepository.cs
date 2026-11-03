@@ -1,4 +1,4 @@
-﻿using LiftAndAesthetics.Models;
+using LiftAndAesthetics.Models;
 using LiftAndAesthetics.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -12,6 +12,9 @@ namespace LiftAndAesthetics.Repositories
 
         public async Task<Members?> GetByEmailAsync(string email) =>
             await LiftContext.Members.FirstOrDefaultAsync(m => m.Email == email);
+
+        public async Task<Members?> GetByIdAsync(int id) =>
+            await LiftContext.Members.FirstOrDefaultAsync(m => m.MemberId == id);
 
         public async Task<Members?> GetByCredentialsAsync(string email, string password) =>
             await LiftContext.Members.FirstOrDefaultAsync(m => m.Email == email && m.Password == password);
