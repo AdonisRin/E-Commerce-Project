@@ -1,4 +1,4 @@
-﻿using LiftAndAesthetics.Models;
+using LiftAndAesthetics.Models;
 using LiftAndAesthetics.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,10 +50,14 @@ namespace LiftAndAesthetics.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
         {
-            if (quantity > 0)
+            var result = await _cartService.UpdateQuantityAsync(cartItemId, quantity);
+            if (result.Success)
             {
-                await _cartService.UpdateQuantityAsync(cartItemId, quantity);
-                TempData["SuccessMessage"] = "Quantity updated successfully!";
+                TempData["SuccessMessage"] = result.Message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
             }
             return RedirectToAction(nameof(Index));
         }

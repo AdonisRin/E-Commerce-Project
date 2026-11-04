@@ -1,4 +1,4 @@
-﻿using LiftAndAesthetics.Models;
+using LiftAndAesthetics.Models;
 using LiftAndAesthetics.Repositories.Interfaces;
 using LiftAndAesthetics.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -30,9 +30,20 @@ namespace LiftAndAesthetics.Services
 
             if (user == null || product == null) return (false, "Error: Member profile or product not found.");
 
+            // A3: Quantities above available stock are rejected
+            if (product.StockQuantity <= 0)
+            {
+                return (false, $"Product '{product.Name}' is out of stock.");
+            }
+
             var existing = await _repository.Cart.GetExistingItemAsync(user.MemberId, productId);
             if (existing != null)
             {
+                if (existing.Quantity + 1 > product.StockQuantity)
+                {
+                    return (false, $"Cannot add more. Only {product.StockQuantity} unit(s) available in stock.");
+                }
+
                 existing.Quantity++;
                 _repository.Cart.Update(existing);
             }
@@ -41,7 +52,7 @@ namespace LiftAndAesthetics.Services
                 _repository.Cart.Create(new CartItem { MemberId = user.MemberId, ProductId = productId, Quantity = 1 });
             }
 
-            _repository.Save();
+            await _repository.SaveAsync();
             return (true, $"{product.Name} added to cart.");
         }
 
@@ -51,7 +62,7 @@ namespace LiftAndAesthetics.Services
             if (item != null)
             {
                 _repository.Cart.Delete(item);
-                _repository.Save();
+                await _repository.SaveAsync();
             }
         }
 
@@ -61,9 +72,18 @@ namespace LiftAndAesthetics.Services
 
             if (user == null) return (false, "Error: User profile not found!");
 
-            var items = await _repository.Cart.GetByMemberIdAsync(user.MemberId);
+            var items = (await _repository.Cart.GetByMemberIdAsync(user.MemberId)).ToList();
 
             if (!items.Any()) return (false, "Your cart is completely empty.");
+
+            // Verify stock
+            foreach (var item in items)
+            {
+                if (item.Product != null && item.Quantity > item.Product.StockQuantity)
+                {
+                    return (false, $"Insufficient stock for '{item.Product.Name}'. Only {item.Product.StockQuantity} available.");
+                }
+            }
 
             decimal total = items.Sum(i => i.Quantity * (i.Product?.Price ?? 0));
 
@@ -73,26 +93,51 @@ namespace LiftAndAesthetics.Services
             {
                 user.WalletBalance -= total;
                 _repository.Member.Update(user);
-                _repository.Cart.ClearCart(user.MemberId);
 
-                _repository.Save();
+                // Deduct stock
+                foreach (var item in items)
+                {
+                    if (item.Product != null)
+                    {
+                        item.Product.StockQuantity -= item.Quantity;
+                        _repository.Product.Update(item.Product);
+                    }
+                }
+
+                _repository.Cart.ClearCart(user.MemberId);
+                await _repository.SaveAsync();
 
                 return (true, $"Payment success! You paid {total:0.00} lei. Remaining balance: {user.WalletBalance:0.00} lei.");
             }
 
-            return (false, "Insufficient funds! Do you even lift?");
+            return (false, "Insufficient funds! Please top up your wallet or use card checkout.");
         }
 
-        public async Task UpdateQuantityAsync(int cartItemId, int quantity)
+        public async Task<(bool Success, string Message)> UpdateQuantityAsync(int cartItemId, int quantity)
         {
-            var item = await _repository.Cart.FindByCondition(c => c.CartItemId == cartItemId).FirstOrDefaultAsync();
-
-            if (item != null && quantity > 0)
+            if (quantity <= 0)
             {
-                item.Quantity = quantity;
-                _repository.Cart.Update(item);
-                _repository.Save();
+                await RemoveItemAsync(cartItemId);
+                return (true, "Item removed from cart.");
             }
+
+            var item = await _repository.Cart.FindByCondition(c => c.CartItemId == cartItemId)
+                .Include(c => c.Product)
+                .FirstOrDefaultAsync();
+
+            if (item == null) return (false, "Cart item not found.");
+
+            // A3: Quantities above available stock are rejected
+            if (item.Product != null && quantity > item.Product.StockQuantity)
+            {
+                return (false, $"Cannot set quantity to {quantity}. Maximum available stock is {item.Product.StockQuantity}.");
+            }
+
+            item.Quantity = quantity;
+            _repository.Cart.Update(item);
+            await _repository.SaveAsync();
+
+            return (true, "Quantity updated successfully.");
         }
     }
 }
