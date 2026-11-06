@@ -1,0 +1,248 @@
+@model LiftAndAesthetics.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Secure Checkout";
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.92), rgba(10,12,16,0.96)), url('/photos/weightlifting.png') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-3 text-uppercase text-white" style="letter-spacing: 2px;">Checkout & Order Summary</h1>
+    <p class="font-montserrat lead text-uppercase" style="letter-spacing: 1px; color: #cbd5e1;">Step 1: Delivery Address &bull; Step 2: Courier Method &bull; Step 3: Review & Promo &bull; Step 4: Payment</p>
+</div>
+
+<div class="container my-5">
+    <form asp-action="PlaceOrder" method="post" id="checkoutForm">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- Left Column: Steps 1, 2, 4 -->
+            <div class="col-12 col-lg-7">
+                <!-- Step 1: Address (A4, A5) -->
+                <div class="p-4 rounded-3 mb-4" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #dc3545;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-danger font-bebas fs-5 px-3">STEP 1</span>
+                        <h4 class="font-bebas text-white fs-3 mb-0" style="letter-spacing: 1px;">Delivery Address</h4>
+                    </div>
+
+                    <div class="row g-3 font-montserrat">
+                        <div class="col-12 col-md-6">
+                            <label asp-for="CustomerName" class="form-label text-white small fw-bold">Full Name</label>
+                            <input asp-for="CustomerName" class="form-control bg-dark text-white border-secondary" required />
+                            <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label asp-for="CustomerEmail" class="form-label text-white small fw-bold">Email Address (Confirmation Receipt Recipient)</label>
+                            <input asp-for="CustomerEmail" class="form-control bg-dark text-white border-secondary" readonly />
+                            <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <label asp-for="DeliveryAddress" class="form-label text-white small fw-bold">Street Address</label>
+                            <input asp-for="DeliveryAddress" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Strada Victoriei Nr. 42" required />
+                            <span asp-validation-for="DeliveryAddress" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label asp-for="DeliveryCity" class="form-label text-white small fw-bold">City / County</label>
+                            <input asp-for="DeliveryCity" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Craiova" required />
+                            <span asp-validation-for="DeliveryCity" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Delivery Method (A5: at least two, with different costs) -->
+                <div class="p-4 rounded-3 mb-4" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #0dcaf0;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-info text-dark font-bebas fs-5 px-3">STEP 2</span>
+                        <h4 class="font-bebas text-white fs-3 mb-0" style="letter-spacing: 1px;">Delivery Method</h4>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3 font-montserrat">
+                        <label class="p-3 rounded border d-flex justify-content-between align-items-center" style="background: #0f1219; border-color: #3b4256 !important; cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" asp-for="DeliveryMethod" value="Standard Delivery" id="delivStandard" checked class="form-check-input" onchange="updateDeliveryCost(15.00)" />
+                                <div>
+                                    <div class="text-white fw-bold fs-6">Standard Courier Delivery (2-3 Business Days)</div>
+                                    <div style="color: #cbd5e1; font-size: 0.88rem; font-weight: 500;">Reliable door-to-door or parcel locker dispatch across Romania.</div>
+                                </div>
+                            </div>
+                            <div class="font-bebas text-white fs-4">15.00 LEI</div>
+                        </label>
+
+                        <label class="p-3 rounded border d-flex justify-content-between align-items-center" style="background: #0f1219; border-color: #3b4256 !important; cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" asp-for="DeliveryMethod" value="Express Delivery" id="delivExpress" class="form-check-input" onchange="updateDeliveryCost(25.00)" />
+                                <div>
+                                    <div class="text-white fw-bold fs-6">Express Same-Day / Next-Day Priority</div>
+                                    <div style="color: #cbd5e1; font-size: 0.88rem; font-weight: 500;">High-priority athletic dispatch within 4 hours.</div>
+                                </div>
+                            </div>
+                            <div class="font-bebas text-danger fs-4">25.00 LEI</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 4 Selection: Payment Method (A5, A6) -->
+                <div class="p-4 rounded-3 mb-4" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #ffc107;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-warning text-dark font-bebas fs-5 px-3">STEP 4</span>
+                        <h4 class="font-bebas text-white fs-3 mb-0" style="letter-spacing: 1px;">Payment Method</h4>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3 font-montserrat">
+                        <label class="p-3 rounded border d-flex justify-content-between align-items-center" style="background: #0f1219; border-color: #3b4256 !important; cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" asp-for="PaymentMethod" value="Credit Card (Sandbox)" checked class="form-check-input" />
+                                <div>
+                                    <div class="text-white fw-bold fs-6">Credit / Debit Card (Stripe Sandbox)</div>
+                                    <div style="color: #cbd5e1; font-size: 0.88rem; font-weight: 500;">Instant payment confirmation via secure payment gateway webhook.</div>
+                                </div>
+                            </div>
+                            <span class="badge bg-secondary text-white font-montserrat px-2 py-1">Test Card Gateway</span>
+                        </label>
+
+                        <label class="p-3 rounded border d-flex justify-content-between align-items-center" style="background: #0f1219; border-color: #3b4256 !important; cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" asp-for="PaymentMethod" value="Wallet" class="form-check-input" />
+                                <div>
+                                    <div class="text-white fw-bold fs-6">Lift & Aesthetics Account Wallet</div>
+                                    <div style="color: #cbd5e1; font-size: 0.88rem; font-weight: 500;">Instant deduction from your prepaid gym membership balance.</div>
+                                </div>
+                            </div>
+                            <span class="badge bg-dark border border-secondary text-white font-montserrat px-2 py-1">Wallet Balance</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Step 3 Order Summary & Promo Code (B5) -->
+            <div class="col-12 col-lg-5">
+                <div class="p-4 rounded-3 position-sticky" style="top: 20px; background: #141721; border: 1px solid #282e3e;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-light text-dark font-bebas fs-5 px-3">STEP 3</span>
+                        <h4 class="font-bebas text-white fs-3 mb-0" style="letter-spacing: 1px;">Order Summary</h4>
+                    </div>
+
+                    <!-- Cart Items Preview -->
+                    <div class="d-flex flex-column gap-2 mb-3 border-bottom pb-3" style="border-color: #282e3e !important;">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="d-flex justify-content-between align-items-center font-montserrat small">
+                                <div>
+                                    <span class="text-white fw-bold">@(item.Product?.Name ?? "Item")</span>
+                                    <span style="color: #cbd5e1;">x@(item.Quantity)</span>
+                                </div>
+                                <span class="text-danger fw-bold fs-6">@((item.Quantity * (item.Product?.Price ?? 0)).ToString("0.00")) LEI</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Promo Code Input (B5) -->
+                    <div class="mb-3">
+                        <label class="form-label text-white font-montserrat small fw-bold">Discount / Promo Code</label>
+                        <div class="input-group">
+                            <input type="text" asp-for="DiscountCode" id="promoCodeInput" class="form-control bg-dark text-white border-secondary text-uppercase fw-bold" placeholder="e.g. LIFT10" />
+                            <button type="button" class="btn btn-outline-danger font-bebas fs-5 px-3" onclick="applyPromo()">Apply</button>
+                        </div>
+                        <div id="promoFeedback" class="small mt-1 font-montserrat"></div>
+                        
+                        <!-- High Contrast Promo Box -->
+                        <div class="mt-2 p-2 rounded font-montserrat" style="background: rgba(255,255,255,0.06); border: 1px solid #3a4358; color: #f1f5f9; font-size: 0.82rem;">
+                            <span class="text-warning fw-bold d-block mb-1">Active Promo Codes:</span>
+                            <span class="badge bg-danger text-white me-1">LIFT10</span> (10% OFF) &bull; 
+                            <span class="badge bg-danger text-white me-1">AESTHETICS20</span> (20% OFF) &bull; 
+                            <span class="badge bg-danger text-white me-1">WELCOME25</span> (25 LEI OFF)
+                        </div>
+                    </div>
+
+                    <!-- Financial Breakdown -->
+                    <div class="d-flex flex-column gap-2 font-montserrat border-bottom pb-3 mb-3" style="border-color: #282e3e !important;">
+                        <div class="d-flex justify-content-between" style="color: #cbd5e1; font-weight: 500;">
+                            <span>Subtotal</span>
+                            <span id="subtotalDisplay" class="text-white fw-bold">@Model.Subtotal.ToString("0.00") LEI</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-success fw-bold" id="discountRow" style="display: none !important;">
+                            <span>Discount Applied</span>
+                            <span id="discountDisplay">-0.00 LEI</span>
+                        </div>
+                        <div class="d-flex justify-content-between" style="color: #cbd5e1; font-weight: 500;">
+                            <span>Shipping</span>
+                            <span id="deliveryCostDisplay" class="text-white fw-bold">15.00 LEI</span>
+                        </div>
+                    </div>
+
+                    <!-- Grand Total -->
+                    <div class="d-flex justify-content-between align-items-baseline mb-4">
+                        <span class="font-bebas text-white fs-3">Grand Total</span>
+                        <span class="font-bebas text-danger display-6" id="grandTotalDisplay">@Model.TotalAmount.ToString("0.00") LEI</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger font-bebas fs-4 w-100 py-3 shadow" style="letter-spacing: 1px;">
+                        Proceed to Payment
+                    </button>
+                    <div class="text-center mt-3">
+                        <a asp-controller="Cart" asp-action="Index" class="font-montserrat small fw-bold text-decoration-none" style="color: #0dcaf0;">
+                            &larr; Return to Shopping Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    var currentSubtotal = @Model.Subtotal;
+    var currentDeliveryCost = 15.00;
+    var currentDiscount = 0.00;
+
+    function updateDeliveryCost(cost) {
+        currentDeliveryCost = cost;
+        document.getElementById("deliveryCostDisplay").innerText = cost.toFixed(2) + " LEI";
+        calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+        var total = Math.max(0, currentSubtotal - currentDiscount) + currentDeliveryCost;
+        document.getElementById("grandTotalDisplay").innerText = total.toFixed(2) + " LEI";
+    }
+
+    async function applyPromo() {
+        var code = document.getElementById("promoCodeInput").value.trim();
+        var feedback = document.getElementById("promoFeedback");
+
+        if (!code) {
+            feedback.className = "text-danger small mt-1 font-montserrat fw-bold";
+            feedback.innerText = "Please enter a coupon code.";
+            return;
+        }
+
+        try {
+            var formData = new FormData();
+            formData.append("code", code);
+            formData.append("subtotal", currentSubtotal);
+
+            var response = await fetch("/Checkout/ValidatePromoCode", {
+                method: "POST",
+                body: formData
+            });
+
+            var result = await response.json();
+            if (result.success) {
+                currentDiscount = result.discountAmount;
+                feedback.className = "text-success small mt-1 font-montserrat fw-bold";
+                feedback.innerText = result.message;
+
+                document.getElementById("discountRow").style.setProperty("display", "flex", "important");
+                document.getElementById("discountDisplay").innerText = "-" + currentDiscount.toFixed(2) + " LEI";
+                calculateGrandTotal();
+            } else {
+                currentDiscount = 0.00;
+                feedback.className = "text-danger small mt-1 font-montserrat fw-bold";
+                feedback.innerText = result.message;
+                document.getElementById("discountRow").style.setProperty("display", "none", "important");
+                calculateGrandTotal();
+            }
+        } catch (e) {
+            feedback.className = "text-danger small mt-1 font-montserrat fw-bold";
+            feedback.innerText = "Error verifying promo code.";
+        }
+    }
+</script>

@@ -1,0 +1,114 @@
+@model LiftAndAesthetics.Models.Order
+
+@{
+    ViewData["Title"] = $"Sandbox Payment - Order #{Model.OrderNumber}";
+    decimal walletBalance = ViewBag.WalletBalance ?? 0m;
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.92), rgba(10,12,16,0.96)), url('/photos/weightlifting.png') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-3 text-uppercase text-white" style="letter-spacing: 2px;">Sandbox Payment Gateway</h1>
+    <p class="font-montserrat lead text-secondary text-uppercase" style="letter-spacing: 1px;">Processing Order #@Model.OrderNumber &bull; Strict Webhook / Server Confirmation</p>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="p-4 p-md-5 rounded-3" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #dc3545;">
+                <div class="text-center mb-4">
+                    <span class="badge bg-secondary font-montserrat text-uppercase px-3 py-2">Test Environment / Sandbox</span>
+                    <h3 class="font-bebas text-white display-6 mt-3 mb-1" style="letter-spacing: 1px;">Confirm Payment</h3>
+                    <div class="font-bebas text-danger display-5">@Model.TotalAmount.ToString("0.00") LEI</div>
+                    <div class="small text-secondary font-montserrat">Order Number: <strong>@Model.OrderNumber</strong></div>
+                </div>
+
+                <!-- Order items summary -->
+                <div class="p-3 rounded mb-4 font-montserrat small" style="background: #0f1219; border: 1px solid #242938;">
+                    <div class="fw-bold text-light mb-2">Order Summary:</div>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="d-flex justify-content-between text-secondary">
+                            <span>@(item.Product?.Name ?? $"Item #{item.ProductId}") (x@(item.Quantity))</span>
+                            <span class="text-white">@item.TotalPrice.ToString("0.00") LEI</span>
+                        </div>
+                    }
+                    <div class="d-flex justify-content-between text-secondary mt-1">
+                        <span>Delivery (@Model.DeliveryMethod)</span>
+                        <span class="text-white">@Model.DeliveryCost.ToString("0.00") LEI</span>
+                    </div>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="d-flex justify-content-between text-success mt-1">
+                            <span>Promo Discount (@Model.DiscountCode)</span>
+                            <span>-@Model.DiscountAmount.ToString("0.00") LEI</span>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.PaymentMethod == "Wallet")
+                {
+                    <div class="mb-4 p-3 rounded font-montserrat" style="background: #0f1219; border: 1px solid #282e3e;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary small">Your Gym Wallet Balance:</span>
+                            <span class="font-bebas text-info fs-4">@walletBalance.ToString("0.00") LEI</span>
+                        </div>
+                        @if (walletBalance < Model.TotalAmount)
+                        {
+                            <div class="text-danger small mt-2">Insufficient wallet balance to cover this order.</div>
+                        }
+                    </div>
+
+                    <form asp-action="ConfirmPayment" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                        <input type="hidden" name="paymentMethod" value="Wallet" />
+                        <button type="submit" class="btn btn-danger font-bebas fs-4 w-100 py-3" @(walletBalance < Model.TotalAmount ? "disabled" : "") style="letter-spacing: 1px;">
+                            Confirm Payment from Wallet
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <!-- Test Card Interface -->
+                    <div class="mb-4 font-montserrat">
+                        <label class="form-label text-light small fw-bold">Test Card Number (Stripe / Netopia Simulation)</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary mb-2" value="4242 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4242" readonly />
+                        
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label text-light small fw-bold">Expiry Date</label>
+                                <input type="text" class="form-control bg-dark text-white border-secondary" value="12/28" readonly />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-light small fw-bold">CVC / CVV</label>
+                                <input type="text" class="form-control bg-dark text-white border-secondary" value="123" readonly />
+                            </div>
+                        </div>
+                        <div class="small text-secondary mt-2">
+                            A6 Compliance: Payment confirmation is executed strictly via server-side verification before status changes to <code>Paid</code> and inventory decrements.
+                        </div>
+                    </div>
+
+                    <!-- Sandbox Confirmation Form (Successful payment) -->
+                    <form asp-action="ConfirmPayment" method="post" class="mb-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                        <input type="hidden" name="paymentMethod" value="Credit Card (Test)" />
+                        <button type="submit" class="btn btn-success font-bebas fs-4 w-100 py-3" style="letter-spacing: 1px;">
+                            Simulate Successful Payment (Card Approved)
+                        </button>
+                    </form>
+
+                    <!-- Sandbox Failure Simulation (A6: failed payment leaves order Unpaid) -->
+                    <form asp-action="SimulateFailure" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                        <button type="submit" class="btn btn-outline-danger font-montserrat btn-sm w-100 py-2">
+                            Simulate Failed / Declined Payment (Leaves Order Unpaid)
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

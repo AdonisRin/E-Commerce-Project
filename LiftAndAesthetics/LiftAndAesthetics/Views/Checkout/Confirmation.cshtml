@@ -1,0 +1,116 @@
+@model LiftAndAesthetics.Models.Order
+
+@{
+    ViewData["Title"] = $"Order Confirmation #{Model.OrderNumber}";
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.92), rgba(10,12,16,0.96)), url('/photos/weightlifting.png') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-3 text-uppercase text-white" style="letter-spacing: 2px;">Order Confirmed!</h1>
+    <p class="font-montserrat lead text-success text-uppercase fw-bold" style="letter-spacing: 1px;">Thank you for your order. Your gear and supplements are being prepared for dispatch.</p>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="p-4 p-md-5 rounded-3" style="background: #141721; border: 1px solid #282e3e; border-top: 4px solid #28a745;">
+                <div class="text-center mb-4 pb-3 border-bottom" style="border-color: #242938 !important;">
+                    <div class="badge bg-success font-montserrat px-3 py-2 fs-6 mb-2">Order Confirmed &bull; Status: @Model.Status</div>
+                    <h2 class="font-bebas text-white display-5 mb-1" style="letter-spacing: 1px;">Order #@Model.OrderNumber</h2>
+                    <p class="font-montserrat small mb-0" style="color: #cbd5e1;">Confirmation receipt generated on @Model.OrderDate.ToString("dd MMMM yyyy, HH:mm")</p>
+                </div>
+
+                <!-- Delivery Details Grid -->
+                <div class="row g-3 mb-4 font-montserrat small">
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded h-100" style="background: #0f1219; border: 1px solid #282e3e;">
+                            <div class="fw-bold text-uppercase mb-1" style="color: #94a3b8;">Customer & Delivery:</div>
+                            <div class="text-white fw-bold fs-6">@Model.CustomerName</div>
+                            <div style="color: #cbd5e1;">@Model.CustomerEmail</div>
+                            <div class="text-white mt-1 fw-semibold">@Model.DeliveryAddress, @Model.DeliveryCity</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded h-100" style="background: #0f1219; border: 1px solid #282e3e;">
+                            <div class="fw-bold text-uppercase mb-1" style="color: #94a3b8;">Shipping & Payment:</div>
+                            <div class="text-white fw-bold">@Model.DeliveryMethod (@Model.DeliveryCost.ToString("0.00") LEI)</div>
+                            <div style="color: #cbd5e1;">Payment Method: <strong class="text-white">@Model.PaymentMethod</strong></div>
+                            @if (Model.PaymentConfirmedAt.HasValue)
+                            {
+                                <div class="text-success mt-1 fw-bold">Verified: @Model.PaymentConfirmedAt.Value.ToString("HH:mm:ss")</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purchased Items Table -->
+                <h5 class="font-bebas text-white fs-4 mb-3" style="letter-spacing: 1px;">Items in this Order</h5>
+                <div class="table-responsive rounded mb-4" style="border: 1px solid #282e3e;">
+                    <table class="table table-dark mb-0 font-montserrat small align-middle">
+                        <thead style="background: #0f1219;">
+                            <tr style="color: #94a3b8;">
+                                <th>Product</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderItems)
+                            {
+                                <tr>
+                                    <td class="text-white fw-bold">@(item.Product?.Name ?? $"Product #{item.ProductId}")</td>
+                                    <td class="text-center text-white">@item.Quantity</td>
+                                    <td class="text-end" style="color: #cbd5e1;">@item.UnitPrice.ToString("0.00") LEI</td>
+                                    <td class="text-end text-white fw-bold">@item.TotalPrice.ToString("0.00") LEI</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot style="background: #0f1219; border-top: 2px solid #282e3e;">
+                            <tr>
+                                <td colspan="3" class="text-end" style="color: #cbd5e1;">Subtotal:</td>
+                                <td class="text-end text-white fw-bold">@Model.Subtotal.ToString("0.00") LEI</td>
+                            </tr>
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-end text-success fw-bold">Discount (@Model.DiscountCode):</td>
+                                    <td class="text-end text-success fw-bold">-@Model.DiscountAmount.ToString("0.00") LEI</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td colspan="3" class="text-end" style="color: #cbd5e1;">Shipping Cost:</td>
+                                <td class="text-end text-white fw-bold">@Model.DeliveryCost.ToString("0.00") LEI</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end font-bebas text-white fs-4">Grand Total:</td>
+                                <td class="text-end font-bebas text-danger fs-4">@Model.TotalAmount.ToString("0.00") LEI</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Transactional email note (B6) -->
+                <div class="p-3 rounded mb-4 font-montserrat small" style="background: #0f1219; border-left: 3px solid #0dcaf0; color: #f1f5f9;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="text-info fw-bold">Confirmation Email Dispatched (B6):</span><br/>
+                            Receipt sent to customer <strong class="text-white">@Model.CustomerEmail</strong> and team lead <strong class="text-white">dariusploae@yahoo.com</strong>.
+                        </div>
+                        <a href="/receipts/@(Model.OrderNumber).html" target="_blank" class="btn btn-outline-info font-bebas fs-5 px-3 py-1">
+                            View Dispatched Email Receipt
+                        </a>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-light font-bebas fs-4 px-4 py-2">
+                        View Order History
+                    </a>
+                    <a asp-controller="Shop" asp-action="Index" class="btn btn-danger font-bebas fs-4 px-5 py-2">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
