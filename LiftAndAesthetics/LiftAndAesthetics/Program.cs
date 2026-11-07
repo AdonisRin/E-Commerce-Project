@@ -44,6 +44,10 @@ builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IClassReservationService, ClassReservationService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IDiscountService, DiscountService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 

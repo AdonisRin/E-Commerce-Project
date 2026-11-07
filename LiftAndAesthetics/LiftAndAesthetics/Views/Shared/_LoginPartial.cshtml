@@ -91,7 +91,22 @@
         @if (!isAdmin)
         {
             <li class="nav-item ms-2 mt-3 mt-lg-0">
+                <a class="font-bebas btn btn-outline-danger btn-sm fs-5 px-3" asp-controller="Wishlist" asp-action="Index">Wishlist</a>
+            </li>
+            <li class="nav-item ms-2 mt-3 mt-lg-0">
+                <a class="font-bebas btn btn-outline-light btn-sm fs-5 px-3" asp-controller="Orders" asp-action="Index">Orders</a>
+            </li>
+            <li class="nav-item ms-2 mt-3 mt-lg-0">
                 <a class="font-bebas btn btn-outline-success btn-sm fs-5 px-3" asp-controller="Cart" asp-action="Index">Cart</a>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item ms-2 mt-3 mt-lg-0">
+                <a class="font-bebas btn btn-outline-info btn-sm fs-5 px-3" asp-controller="Shop" asp-action="Orders">Orders</a>
+            </li>
+            <li class="nav-item ms-2 mt-3 mt-lg-0">
+                <a class="font-bebas btn btn-outline-warning btn-sm fs-5 px-3" asp-controller="Shop" asp-action="Dashboard">Analytics</a>
             </li>
         }
 

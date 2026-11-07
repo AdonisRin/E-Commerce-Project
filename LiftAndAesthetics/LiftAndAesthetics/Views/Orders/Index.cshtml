@@ -1,0 +1,101 @@
+@model IEnumerable<LiftAndAesthetics.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders History";
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.92), rgba(10,12,16,0.96)), url('/photos/weightlifting.png') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-3 text-uppercase text-white" style="letter-spacing: 2px;">My Order History</h1>
+    <p class="font-montserrat lead text-secondary text-uppercase" style="letter-spacing: 1px;">Track your fitness gear orders, view invoices, and monitor delivery status.</p>
+</div>
+
+<div class="container my-5">
+    @if (!Model.Any())
+    {
+        <div class="text-center p-5 rounded" style="background: #141721; border: 1px dashed #303749;">
+            <h3 class="font-bebas text-white fs-3 mb-2">No Orders Placed Yet</h3>
+            <p class="font-montserrat text-secondary mb-4">You haven't placed any orders yet. Visit our gym store to gear up.</p>
+            <a asp-controller="Shop" asp-action="Index" class="btn btn-danger font-bebas fs-4 px-4 py-2">Go to Shop</a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-4">
+            @foreach (var order in Model)
+            {
+                string badgeClass = order.Status switch
+                {
+                    "Paid" => "bg-success",
+                    "Shipped" => "bg-info text-dark",
+                    "Delivered" => "bg-primary",
+                    "Cancelled" => "bg-secondary",
+                    "Unpaid" => "bg-danger",
+                    _ => "bg-warning text-dark"
+                };
+
+                <div class="card border-0 shadow-sm rounded-3 text-white" style="background: #141721; border: 1px solid #282e3e !important; border-top: 3px solid #dc3545 !important;">
+                    <div class="card-header p-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: #0f1219; border-bottom: 1px solid #242938;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <span class="font-bebas text-white fs-5">Order #@order.OrderNumber</span>
+                                <div class="small text-secondary font-montserrat">Placed on @order.OrderDate.ToString("dd MMMM yyyy, HH:mm")</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge @badgeClass font-montserrat px-3 py-2 fw-bold">@order.Status</span>
+                            <span class="font-bebas text-danger fs-3 mb-0">@order.TotalAmount.ToString("0.00") LEI</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-8">
+                                <h6 class="font-bebas text-secondary fs-6 text-uppercase mb-2">Purchased Items</h6>
+                                <div class="d-flex flex-column gap-2 font-montserrat small">
+                                    @foreach (var item in order.OrderItems)
+                                    {
+                                        <div class="d-flex justify-content-between border-bottom pb-2" style="border-color: #242938 !important;">
+                                            <div>
+                                                <span class="text-white fw-bold">@(item.Product?.Name ?? $"Product #{item.ProductId}")</span>
+                                                <span class="text-secondary ms-2">x@(item.Quantity)</span>
+                                            </div>
+                                            <span class="text-white">@item.TotalPrice.ToString("0.00") LEI</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4 border-start" style="border-color: #242938 !important;">
+                                <h6 class="font-bebas text-secondary fs-6 text-uppercase mb-2">Shipping Information</h6>
+                                <div class="font-montserrat small text-light mb-3">
+                                    <div><strong>Method:</strong> @order.DeliveryMethod</div>
+                                    <div><strong>Destination:</strong> @order.DeliveryAddress, @order.DeliveryCity</div>
+                                    <div><strong>Payment:</strong> @order.PaymentMethod</div>
+                                </div>
+
+                                <!-- A7: Order Cancellation (Restores stock) -->
+                                @if (order.Status == "New" || order.Status == "Paid")
+                                {
+                                    <form asp-action="Cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this order? Your payment will be refunded and items returned to stock.');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@order.OrderId" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm font-montserrat w-100">
+                                            Cancel Order (Restore Stock)
+                                        </button>
+                                    </form>
+                                }
+                                else if (order.Status == "Unpaid")
+                                {
+                                    <a asp-controller="Checkout" asp-action="Payment" asp-route-orderId="@order.OrderId" class="btn btn-outline-warning btn-sm font-montserrat w-100">
+                                        Retry Payment
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

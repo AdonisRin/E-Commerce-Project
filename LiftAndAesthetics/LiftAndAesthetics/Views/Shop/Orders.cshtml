@@ -1,0 +1,127 @@
+@model IEnumerable<LiftAndAesthetics.Models.Order>
+
+@{
+    ViewData["Title"] = "Admin - Orders Management";
+    string currentFilter = ViewBag.CurrentStatus ?? "All";
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.92), rgba(10,12,16,0.96)), url('/photos/weightlifting.png') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-3 text-uppercase text-white" style="letter-spacing: 2px;">Orders Administration</h1>
+    <p class="font-montserrat lead text-secondary text-uppercase" style="letter-spacing: 1px;">Manage incoming customer orders, review payments, and transition fulfillment status.</p>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+        <a asp-action="Dashboard" class="btn btn-outline-info font-bebas fs-5 px-4">Sales Dashboard</a>
+        <a asp-action="Index" class="btn btn-outline-light font-bebas fs-5 px-4">Gym Shop</a>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Status Filter Bar (A9) -->
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4 pb-2 border-bottom border-secondary">
+        @{
+            string[] statuses = new[] { "All", "New", "Paid", "Shipped", "Delivered", "Cancelled" };
+        }
+        @foreach (var s in statuses)
+        {
+            bool isActive = currentFilter.Equals(s, StringComparison.OrdinalIgnoreCase);
+            <a asp-action="Orders" asp-route-status="@s" class="btn @(isActive ? "btn-danger" : "btn-outline-secondary text-white") font-bebas fs-5 px-4">
+                @s.ToUpper()
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center p-5 rounded" style="background: #141721; border: 1px dashed #303749;">
+            <h3 class="font-bebas text-white fs-3 mb-2">No Orders Found</h3>
+            <p class="font-montserrat text-secondary">There are currently no orders in status "@currentFilter".</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive rounded shadow-sm" style="background: #141721; border: 1px solid #282e3e;">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead style="background: #0f1219; border-bottom: 2px solid #dc3545;">
+                    <tr class="font-montserrat small text-uppercase text-secondary">
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Fulfillment Action</th>
+                    </tr>
+                </thead>
+                <tbody class="font-montserrat">
+                    @foreach (var order in Model)
+                    {
+                        string badgeClass = order.Status switch
+                        {
+                            "Paid" => "bg-success",
+                            "Shipped" => "bg-info text-dark",
+                            "Delivered" => "bg-primary",
+                            "Cancelled" => "bg-secondary",
+                            "Unpaid" => "bg-danger",
+                            _ => "bg-warning text-dark"
+                        };
+
+                        <tr>
+                            <td>
+                                <strong class="text-white font-bebas fs-5">@order.OrderNumber</strong>
+                                <div class="small text-secondary">@order.PaymentMethod</div>
+                            </td>
+                            <td class="small text-light">@order.OrderDate.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td>
+                                <div class="text-white fw-bold">@order.CustomerName</div>
+                                <div class="small text-secondary">@order.CustomerEmail</div>
+                                <div class="small text-secondary">@order.DeliveryCity, @order.DeliveryAddress</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark border border-secondary text-light">
+                                    @order.OrderItems.Sum(i => i.Quantity) items
+                                </span>
+                                <div class="small text-secondary mt-1">
+                                    @foreach (var item in order.OrderItems.Take(2))
+                                    {
+                                        <div>@(item.Product?.Name ?? $"Item #{item.ProductId}") (x@(item.Quantity))</div>
+                                    }
+                                    @if (order.OrderItems.Count > 2)
+                                    {
+                                        <div class="text-muted">+@(order.OrderItems.Count - 2) more...</div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="font-bebas text-danger fs-4">@order.TotalAmount.ToString("0.00") LEI</div>
+                                @if (order.DiscountAmount > 0)
+                                {
+                                    <div class="small text-success">Saved @order.DiscountAmount.ToString("0.00") LEI (@order.DiscountCode)</div>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @badgeClass px-3 py-2 font-montserrat fw-bold">@order.Status</span>
+                            </td>
+                            <td>
+                                <!-- A9: Status transitions: New -> Paid -> Shipped -> Delivered, or Cancelled -->
+                                <form asp-action="UpdateOrderStatus" method="post" class="d-flex gap-1 align-items-center">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderId" value="@order.OrderId" />
+                                    <input type="hidden" name="currentFilter" value="@currentFilter" />
+
+                                    <select name="newStatus" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 130px;">
+                                        <option value="New" selected="@(order.Status == "New")">New</option>
+                                        <option value="Paid" selected="@(order.Status == "Paid")">Paid</option>
+                                        <option value="Shipped" selected="@(order.Status == "Shipped")">Shipped</option>
+                                        <option value="Delivered" selected="@(order.Status == "Delivered")">Delivered</option>
+                                        <option value="Cancelled" selected="@(order.Status == "Cancelled")">Cancelled</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-light font-montserrat">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
