@@ -1,0 +1,23 @@
+==================================================
+           LIFT & AESTHETICS - ORDER RECEIPT      
+==================================================
+Order Number  : ORD-20261110-4220
+Date          : 10 Nov 2026, 21:37
+Customer Name : Chad Gymbro
+Customer Email: athlete@lift.com
+Team Copy To  : dariusploae@yahoo.com, peca.ana.p2f@student.ucv.ro, nica.david.p7c@student.ucv.ro
+Delivery To   : Strada Victoriei Nr. 42, Craiova
+Method        : Standard Delivery (15.00 LEI)
+Status        : Paid
+Payment Via   : Credit Card (Test)
+--------------------------------------------------
+ITEMS PURCHASED:
+ • 100% Whey Protein Gold 2kg x1 @ 280.00 LEI = 280.00 LEI
+ • Micronized Creatine Monohydrate x1 @ 67.00 LEI = 67.00 LEI
+--------------------------------------------------
+Subtotal      : 347.00 LEI
+Discount (LIFT10): -34.70 LEI
+Shipping      : 15.00 LEI
+TOTAL PAID    : 327.30 LEI
+==================================================
+Thank you for your order! Train hard, stay aesthetic.

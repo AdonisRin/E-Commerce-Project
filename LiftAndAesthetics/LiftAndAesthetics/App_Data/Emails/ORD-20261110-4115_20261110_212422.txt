@@ -1,0 +1,20 @@
+==================================================
+           LIFT & AESTHETICS - ORDER RECEIPT      
+==================================================
+Order Number  : ORD-20261110-4115
+Date          : 10 Nov 2026, 21:24
+Customer Name : Chad Gymbro
+Customer Email: athlete@lift.com
+Delivery To   : Strada Victoriei Nr. 42, Craiova
+Method        : Standard Delivery (15.00 LEI)
+Status        : Paid
+Payment Via   : Credit Card (Test)
+--------------------------------------------------
+ITEMS PURCHASED:
+ • Micronized Creatine Monohydrate x1 @ 67.00 LEI = 67.00 LEI
+--------------------------------------------------
+Subtotal      : 67.00 LEI
+Shipping      : 15.00 LEI
+TOTAL PAID    : 82.00 LEI
+==================================================
+Thank you for your order! Train hard, stay aesthetic.
