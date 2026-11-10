@@ -1,0 +1,168 @@
+@model LiftAndAesthetics.ViewModels.SalesDashboardViewModel
+
+@{
+    ViewData["Title"] = "Sales Analytics & Performance Dashboard";
+}
+
+<div class="container-fluid text-center py-5 shadow-sm" style="background: linear-gradient(rgba(10,12,16,0.92), rgba(10,12,16,0.96)), url('/photos/weightlifting.png') center/cover; border-bottom: 2px solid #222632;">
+    <h1 class="font-bebas display-3 text-uppercase text-white" style="letter-spacing: 2px;">Sales & E-Commerce Dashboard</h1>
+    <p class="font-montserrat lead text-uppercase" style="letter-spacing: 1px; color: #cbd5e1;">Revenue metrics, sales trend charts, average order value, and top performing inventory.</p>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+        <a asp-action="Orders" class="btn btn-outline-danger font-bebas fs-5 px-4">Manage Orders</a>
+        <a asp-action="Index" class="btn btn-outline-light font-bebas fs-5 px-4">Gym Shop</a>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Interval Filter Tabs (B4: for a selected time interval) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h4 class="font-bebas text-white fs-3 mb-0" style="letter-spacing: 1px;">Store Performance Overview</h4>
+        <div class="btn-group">
+            <a asp-action="Dashboard" asp-route-days="7" class="btn @(Model.TimeInterval == "7" ? "btn-danger" : "btn-outline-secondary text-light") font-montserrat btn-sm px-3 fw-bold">Last 7 Days</a>
+            <a asp-action="Dashboard" asp-route-days="30" class="btn @(Model.TimeInterval == "30" ? "btn-danger" : "btn-outline-secondary text-light") font-montserrat btn-sm px-3 fw-bold">Last 30 Days</a>
+            <a asp-action="Dashboard" asp-route-days="365" class="btn @(Model.TimeInterval == "365" || Model.TimeInterval == "all" ? "btn-danger" : "btn-outline-secondary text-light") font-montserrat btn-sm px-3 fw-bold">All Time</a>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards with High Contrast -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d; border-left: 4px solid #28a745;">
+                <div class="font-montserrat small text-uppercase fw-bold mb-1" style="color: #94a3b8; letter-spacing: 0.5px;">Total Revenue</div>
+                <div class="font-bebas text-white display-6" style="letter-spacing: 1px;">@Model.TotalRevenue.ToString("0.00") <span class="fs-6 text-white-50">LEI</span></div>
+                <div class="font-montserrat mt-2 fw-semibold" style="color: #cbd5e1; font-size: 0.85rem;">Paid & fulfilled orders</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d; border-left: 4px solid #0dcaf0;">
+                <div class="font-montserrat small text-uppercase fw-bold mb-1" style="color: #94a3b8; letter-spacing: 0.5px;">Completed Orders</div>
+                <div class="font-bebas text-white display-6" style="letter-spacing: 1px;">@Model.TotalOrders</div>
+                <div class="font-montserrat mt-2 fw-semibold" style="color: #cbd5e1; font-size: 0.85rem;">Successfully processed</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d; border-left: 4px solid #dc3545;">
+                <div class="font-montserrat small text-uppercase fw-bold mb-1" style="color: #94a3b8; letter-spacing: 0.5px;">Average Order Value (AOV)</div>
+                <div class="font-bebas text-danger display-6" style="letter-spacing: 1px;">@Model.AverageOrderValue.ToString("0.00") <span class="fs-6 text-white-50">LEI</span></div>
+                <div class="font-montserrat mt-2 fw-semibold" style="color: #cbd5e1; font-size: 0.85rem;">Revenue / total orders</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d; border-left: 4px solid #ffc107;">
+                <div class="font-montserrat small text-uppercase fw-bold mb-1" style="color: #94a3b8; letter-spacing: 0.5px;">Units Sold</div>
+                <div class="font-bebas text-white display-6" style="letter-spacing: 1px;">@Model.TotalItemsSold</div>
+                <div class="font-montserrat mt-2 fw-semibold" style="color: #cbd5e1; font-size: 0.85rem;">Individual gear & supplements</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Sales Chart (B4) -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-8">
+            <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="font-bebas text-white fs-4 mb-0" style="letter-spacing: 1px;">Daily Sales Revenue (LEI)</h5>
+                    <span class="badge bg-danger font-montserrat px-3 py-1">Sales Volume</span>
+                </div>
+                <div style="position: relative; height: 320px; width: 100%;">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 Products (B4) -->
+        <div class="col-12 col-lg-4">
+            <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d;">
+                <h5 class="font-bebas text-white fs-4 mb-3" style="letter-spacing: 1px;">Top 5 Best-Selling Products</h5>
+                
+                @if (!Model.TopProducts.Any())
+                {
+                    <div class="p-4 text-center font-montserrat small" style="color: #cbd5e1;">
+                        No sales recorded for this timeframe yet.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @for (int i = 0; i < Model.TopProducts.Count; i++)
+                        {
+                            var tp = Model.TopProducts[i];
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: #0f1219; border: 1px solid #2e3649;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary font-bebas fs-6">#@(i + 1)</span>
+                                    <div>
+                                        <div class="font-bebas text-white fs-6 mb-0 text-truncate" style="max-width: 170px;">@tp.Name</div>
+                                        <div class="font-montserrat fw-semibold" style="color: #cbd5e1; font-size: 0.8rem;">
+                                            @tp.Category &bull; <strong class="text-white">@tp.UnitsSold units sold</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="font-bebas text-danger fs-5">
+                                    @tp.TotalSales.ToString("0.00") LEI
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js inclusion for dark-themed chart rendering -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById('salesChart').getContext('2d');
+        var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels));
+        var dataValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartRevenueData));
+
+        var gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(220, 53, 69, 0.55)');
+        gradient.addColorStop(1, 'rgba(220, 53, 69, 0.02)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Revenue (LEI)',
+                    data: dataValues,
+                    backgroundColor: gradient,
+                    borderColor: '#dc3545',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#dc3545',
+                    pointRadius: 5,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff',
+                            font: { family: 'Montserrat', size: 13, weight: 'bold' }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#e2e8f0', font: { family: 'Montserrat', size: 12, weight: '600' } },
+                        grid: { color: 'rgba(255, 255, 255, 0.12)' }
+                    },
+                    y: {
+                        ticks: { color: '#e2e8f0', font: { family: 'Montserrat', size: 12, weight: '600' } },
+                        grid: { color: 'rgba(255, 255, 255, 0.12)' }
+                    }
+                }
+            }
+        });
+    });
+</script>

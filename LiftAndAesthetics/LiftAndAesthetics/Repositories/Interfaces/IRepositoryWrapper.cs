@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace LiftAndAesthetics.Repositories.Interfaces
 {
@@ -16,6 +16,9 @@ namespace LiftAndAesthetics.Repositories.Interfaces
         IChatRepository Chat { get; }
         IClassReservationRepository ClassReservation { get; }
         IReviewRepository Review { get; }
+        IOrderRepository Order { get; }
+        IDiscountCodeRepository DiscountCode { get; }
+        IWishlistRepository Wishlist { get; }
 
         void Save();
         Task SaveAsync();

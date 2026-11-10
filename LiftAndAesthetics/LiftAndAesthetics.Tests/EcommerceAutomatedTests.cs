@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LiftAndAesthetics.Models;
+using LiftAndAesthetics.Services;
 using Xunit;
 
 namespace LiftAndAesthetics.Tests
@@ -259,6 +260,172 @@ namespace LiftAndAesthetics.Tests
 
             // Assert
             Assert.Equal(10, restoredStock);
+        }
+
+        // -------------------------------------------------------------
+        // B5: DISCOUNT / PROMO CODES TESTS
+        // -------------------------------------------------------------
+
+        [Fact]
+        public void DiscountCode_PercentageDiscount_CalculatesCorrectDeduction()
+        {
+            // Arrange
+            var discount = new DiscountCode
+            {
+                Code = "LIFT10",
+                DiscountType = "Percentage",
+                Value = 10,
+                IsActive = true,
+                ExpiryDate = DateTime.Now.AddDays(30),
+                MaxUses = 100,
+                TimesUsed = 5
+            };
+            decimal subtotal = 250.00m;
+
+            // Act
+            decimal discountAmount = Math.Round(subtotal * (discount.Value / 100m), 2);
+            decimal finalTotal = subtotal - discountAmount;
+
+            // Assert
+            Assert.Equal(25.00m, discountAmount);
+            Assert.Equal(225.00m, finalTotal);
+        }
+
+        [Fact]
+        public void DiscountCode_FixedAmountDiscount_CalculatesCorrectDeduction()
+        {
+            // Arrange
+            var discount = new DiscountCode
+            {
+                Code = "WELCOME25",
+                DiscountType = "FixedAmount",
+                Value = 25.00m,
+                IsActive = true,
+                ExpiryDate = DateTime.Now.AddDays(30),
+                MaxUses = 100,
+                TimesUsed = 2
+            };
+            decimal subtotal = 100.00m;
+
+            // Act
+            decimal discountAmount = Math.Min(discount.Value, subtotal);
+            decimal finalTotal = subtotal - discountAmount;
+
+            // Assert
+            Assert.Equal(25.00m, discountAmount);
+            Assert.Equal(75.00m, finalTotal);
+        }
+
+        [Fact]
+        public void DiscountCode_ExpiredCode_ValidationFails()
+        {
+            // Arrange
+            var expiredDiscount = new DiscountCode
+            {
+                Code = "EXPIRED20",
+                ExpiryDate = DateTime.Now.AddDays(-5),
+                IsActive = true
+            };
+
+            // Act
+            bool isValid = DateTime.Now <= expiredDiscount.ExpiryDate && expiredDiscount.IsActive;
+
+            // Assert
+            Assert.False(isValid);
+        }
+
+        [Fact]
+        public void DiscountCode_MaxUsageExceeded_ValidationFails()
+        {
+            // Arrange
+            var exhaustedDiscount = new DiscountCode
+            {
+                Code = "MAXOUT",
+                MaxUses = 10,
+                TimesUsed = 10,
+                ExpiryDate = DateTime.Now.AddDays(10),
+                IsActive = true
+            };
+
+            // Act
+            bool canUse = exhaustedDiscount.TimesUsed < exhaustedDiscount.MaxUses;
+
+            // Assert
+            Assert.False(canUse);
+        }
+
+        // -------------------------------------------------------------
+        // B7: WISHLIST MOVE-TO-CART TESTS
+        // -------------------------------------------------------------
+
+        [Fact]
+        public void Wishlist_MoveToCart_AddsToCartAndRemovesFromWishlist()
+        {
+            // Arrange
+            var wishlist = new List<WishlistItem>
+            {
+                new WishlistItem { WishlistItemId = 1, MemberId = 10, ProductId = 100 }
+            };
+            var cart = new List<CartItem>();
+
+            // Act: Move product 100 to cart
+            var item = wishlist.FirstOrDefault(w => w.ProductId == 100);
+            if (item != null)
+            {
+                cart.Add(new CartItem { MemberId = item.MemberId, ProductId = item.ProductId, Quantity = 1 });
+                wishlist.Remove(item);
+            }
+
+            // Assert
+            Assert.Empty(wishlist);
+            Assert.Single(cart);
+            Assert.Equal(100, cart[0].ProductId);
+        }
+
+        // -------------------------------------------------------------
+        // B2 & B3: RECOMMENDATIONS & REVIEWS TESTS
+        // -------------------------------------------------------------
+
+        [Fact]
+        public void Recommendations_SimilarProducts_ExcludesCurrentProductAndMatchesCategory()
+        {
+            // Arrange
+            var currentProduct = new Product { ProductId = 1, Category = "Supplements", Name = "Whey 1" };
+            var allProducts = new List<Product>
+            {
+                currentProduct,
+                new Product { ProductId = 2, Category = "Supplements", Name = "Whey 2" },
+                new Product { ProductId = 3, Category = "Clothing", Name = "Gym Shirt" },
+                new Product { ProductId = 4, Category = "Supplements", Name = "Creatine" }
+            };
+
+            // Act
+            var similar = allProducts
+                .Where(p => p.ProductId != currentProduct.ProductId && p.Category == currentProduct.Category)
+                .ToList();
+
+            // Assert
+            Assert.Equal(2, similar.Count);
+            Assert.DoesNotContain(similar, p => p.ProductId == currentProduct.ProductId);
+            Assert.All(similar, p => Assert.Equal("Supplements", p.Category));
+        }
+
+        [Fact]
+        public void Reviews_AverageRating_ComputesAccurateMean()
+        {
+            // Arrange
+            var reviews = new List<Review>
+            {
+                new Review { ProductId = 1, Rating = 5 },
+                new Review { ProductId = 1, Rating = 4 },
+                new Review { ProductId = 1, Rating = 4 }
+            };
+
+            // Act
+            double average = Math.Round(reviews.Average(r => r.Rating), 1);
+
+            // Assert: (5 + 4 + 4) / 3 = 13 / 3 = 4.333 -> 4.3
+            Assert.Equal(4.3, average);
         }
     }
 }

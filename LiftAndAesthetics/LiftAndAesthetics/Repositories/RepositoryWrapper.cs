@@ -1,4 +1,4 @@
-﻿using LiftAndAesthetics.Models;
+using LiftAndAesthetics.Models;
 using LiftAndAesthetics.Repositories.Interfaces;
 using System.Threading.Tasks;
 
@@ -19,6 +19,9 @@ namespace LiftAndAesthetics.Repositories
         private IClassReservationRepository? _classReservationRepository;
 
         private IReviewRepository? _reviewRepository;
+        private IOrderRepository? _orderRepository;
+        private IDiscountCodeRepository? _discountCodeRepository;
+        private IWishlistRepository? _wishlistRepository;
 
         public RepositoryWrapper(LiftContext context)
         {
@@ -154,6 +157,42 @@ namespace LiftAndAesthetics.Repositories
                     _reviewRepository = new ReviewRepository(_context);
                 }
                 return _reviewRepository;
+            }
+        }
+
+        public IOrderRepository Order
+        {
+            get
+            {
+                if (_orderRepository == null)
+                {
+                    _orderRepository = new OrderRepository(_context);
+                }
+                return _orderRepository;
+            }
+        }
+
+        public IDiscountCodeRepository DiscountCode
+        {
+            get
+            {
+                if (_discountCodeRepository == null)
+                {
+                    _discountCodeRepository = new DiscountCodeRepository(_context);
+                }
+                return _discountCodeRepository;
+            }
+        }
+
+        public IWishlistRepository Wishlist
+        {
+            get
+            {
+                if (_wishlistRepository == null)
+                {
+                    _wishlistRepository = new WishlistRepository(_context);
+                }
+                return _wishlistRepository;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -28,6 +28,12 @@ namespace LiftAndAesthetics.Models
 
         public string? AdminReply { get; set; }
         public DateTime? ReplyDate { get; set; }
+
+        public int? ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public Product? Product { get; set; }
+
+        public bool IsHidden { get; set; } = false;
 
         [ForeignKey("MemberId")]
         public Members? Member { get; set; }
