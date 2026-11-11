@@ -39,3 +39,8 @@ test_smtp.*
 **/App_Data/
 **/wwwroot/receipts/
 
+# Local sensitive configuration (never push credentials to GitHub)
+**/appsettings.Development.json
+**/appsettings.*.local.json
+
+
