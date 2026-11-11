@@ -49,7 +49,7 @@
                                                 </div>
                                             </td>
                                             <td class="fw-bold text-white fs-5">@(item.Product?.Name ?? "Unknown")</td>
-                                            <td class="text-secondary text-center fw-bold">@(item.Product?.Price.ToString("0.00") ?? "0.00") LEI</td>
+                                            <td class="text-center fw-bold" style="color: #cbd5e1;">@(item.Product?.Price.ToString("0.00") ?? "0.00") LEI</td>
 
                                             <td class="text-center" style="width: 160px;">
                                                 <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-flex justify-content-center align-items-center gap-1 m-0">
@@ -79,7 +79,7 @@
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
 
                             <div class="text-center text-md-start">
-                                <span class="font-montserrat text-secondary fw-bold text-uppercase d-block" style="letter-spacing: 1px; font-size: 0.9rem;">Order Total</span>
+                                <span class="font-montserrat fw-bold text-uppercase d-block" style="letter-spacing: 1px; font-size: 0.9rem; color: #cbd5e1;">Order Total</span>
                                 <h1 class="font-bebas text-danger mb-0" style="font-size: 3rem; letter-spacing: 2px;">
                                     @cartTotal.ToString("0.00") <span class="fs-4 text-white">LEI</span>
                                 </h1>

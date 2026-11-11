@@ -24,35 +24,41 @@
 </div>
 
 <div class="container mb-5 mt-4">
-    <!-- Filter and Search Controls (A1, A2, B1) -->
+    <!-- Filter and Search Controls (A1, A2, B1: AJAX Live Search enabled) -->
     <form method="get" asp-action="Index" id="catalogFilterForm" class="p-3 mb-4 rounded" style="background: #141721; border: 1px solid #282e3e;">
         <div class="row g-3 align-items-end">
-            <!-- Search Input (A2) -->
+            <!-- Search Input (A2 - AJAX live as you type) -->
             <div class="col-12 col-md-4">
-                <label class="form-label text-uppercase font-montserrat fw-bold text-light small mb-1">Search Products</label>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label text-uppercase font-montserrat fw-bold text-light small mb-0">Search Products</label>
+                    <span class="badge bg-danger font-montserrat" id="ajaxSearchBadge" style="display: none; font-size: 0.7rem; letter-spacing: 0.5px;">Searching...</span>
+                </div>
                 <div class="input-group">
-                    <input type="text" name="search" value="@Model.SearchQuery" class="form-control bg-dark text-white border-secondary" placeholder="Search by name or keyword..." />
-                    @if (!string.IsNullOrEmpty(Model.SearchQuery))
-                    {
-                        <a asp-action="Index" asp-route-category="@Model.SelectedCategory" class="btn btn-outline-secondary text-light">Clear</a>
-                    }
+                    <input type="text"
+                           name="search"
+                           id="catalogSearchInput"
+                           value="@Model.SearchQuery"
+                           class="form-control bg-dark text-white border-secondary font-montserrat"
+                           placeholder="Type to search (live AJAX)..."
+                           autocomplete="off" />
+                    <button type="button" class="btn btn-outline-secondary text-light" id="clearSearchBtn" title="Clear search">✕</button>
                 </div>
             </div>
 
             <!-- Price Range (B1) with max protection -->
             <div class="col-6 col-md-2">
                 <label class="form-label text-uppercase font-montserrat fw-bold text-light small mb-1">Min Price (LEI)</label>
-                <input type="number" step="1" min="0" max="999999" name="minPrice" value="@(Model.MinPrice > 0 ? Model.MinPrice.ToString() : "")" class="form-control bg-dark text-white border-secondary" placeholder="0" />
+                <input type="number" step="1" min="0" max="999999" name="minPrice" id="minPriceInput" value="@(Model.MinPrice > 0 ? Model.MinPrice.ToString() : "")" class="form-control bg-dark text-white border-secondary" placeholder="0" />
             </div>
             <div class="col-6 col-md-2">
                 <label class="form-label text-uppercase font-montserrat fw-bold text-light small mb-1">Max Price (LEI)</label>
-                <input type="number" step="1" min="0" max="999999" name="maxPrice" value="@(Model.MaxPrice > 0 ? Model.MaxPrice.ToString() : "")" class="form-control bg-dark text-white border-secondary" placeholder="999" />
+                <input type="number" step="1" min="0" max="999999" name="maxPrice" id="maxPriceInput" value="@(Model.MaxPrice > 0 ? Model.MaxPrice.ToString() : "")" class="form-control bg-dark text-white border-secondary" placeholder="999" />
             </div>
 
             <!-- Sorting (B1) -->
             <div class="col-6 col-md-2">
                 <label class="form-label text-uppercase font-montserrat fw-bold text-light small mb-1">Sort By</label>
-                <select name="sortBy" class="form-select bg-dark text-white border-secondary">
+                <select name="sortBy" id="sortBySelect" class="form-select bg-dark text-white border-secondary font-montserrat">
                     <option value="default" selected="@(Model.SortBy == "default")">Default</option>
                     <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Price: Low to High</option>
                     <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Price: High to Low</option>
@@ -73,220 +79,197 @@
             </div>
         </div>
 
-        <input type="hidden" name="category" value="@Model.SelectedCategory" />
-        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="category" id="selectedCategoryInput" value="@Model.SelectedCategory" />
+        <input type="hidden" name="page" id="currentPageInput" value="@Model.CurrentPage" />
     </form>
 
     <!-- Category Pills Tabs (A1, B1: preserved in URL) -->
-    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4 pb-2 border-bottom border-secondary">
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4 pb-2 border-bottom border-secondary" id="categoryPillsContainer">
         @{
             string[] categories = new[] { "All", "Supplements", "Clothing", "Equipment", "Accessories" };
         }
         @foreach (var cat in categories)
         {
             bool isActive = Model.SelectedCategory.Equals(cat, StringComparison.OrdinalIgnoreCase);
-            <a asp-action="Index"
-               asp-route-category="@cat"
-               asp-route-search="@Model.SearchQuery"
-               asp-route-minPrice="@Model.MinPrice"
-               asp-route-maxPrice="@Model.MaxPrice"
-               asp-route-inStock="@Model.InStockOnly"
-               asp-route-sortBy="@Model.SortBy"
-               class="btn @(isActive ? "btn-danger" : "btn-outline-secondary text-white") font-bebas fs-5 px-4"
+            <a href="javascript:void(0)"
+               onclick="selectCategory(event, '@cat')"
+               data-category="@cat"
+               class="btn category-pill @(isActive ? "btn-danger" : "btn-outline-secondary text-white") font-bebas fs-5 px-4"
                style="letter-spacing: 1px;">
                 @cat.ToUpper()
             </a>
         }
     </div>
 
-    <!-- Active Filter Summary & Result Count -->
-    <div class="d-flex justify-content-between align-items-center mb-4 text-secondary font-montserrat small">
-        <div>
-            Showing <strong>@Model.Products.Count()</strong> of <strong>@Model.TotalProducts</strong> products
-            @if (!string.IsNullOrEmpty(Model.SearchQuery))
-            {
-                <span> for search term "<strong>@Model.SearchQuery</strong>"</span>
-            }
-            @if (Model.SelectedCategory != "All")
-            {
-                <span> in category "<strong>@Model.SelectedCategory</strong>"</span>
-            }
-        </div>
-        @if (!string.IsNullOrEmpty(Model.SearchQuery) || Model.SelectedCategory != "All" || Model.MinPrice.HasValue || Model.MaxPrice.HasValue || Model.InStockOnly || Model.SortBy != "default")
-        {
-            <a asp-action="Index" class="text-danger text-decoration-none fw-bold">Reset All Filters</a>
-        }
+    <!-- Product Grid & Pagination Container (AJAX Target) -->
+    <div id="catalogResultsArea" style="position: relative; min-height: 250px;">
+        <partial name="_ProductGridPartial" model="Model" />
     </div>
-
-    <!-- Product Grid -->
-    <div class="row g-4" id="productsContainer">
-        @if (!Model.Products.Any())
-        {
-            <!-- A2 Empty State Message -->
-            <div class="col-12 text-center p-5 rounded" style="background: #141721; border: 1px dashed #3a4256;">
-                <h3 class="font-bebas text-white mb-2 fs-2" style="letter-spacing: 1px;">No Products Found</h3>
-                <p class="font-montserrat text-secondary mb-4">No items matched your current search criteria or filter combinations. Try adjusting your search query, price range, or category.</p>
-                <a asp-action="Index" class="btn btn-danger font-bebas fs-5 px-4 py-2" style="letter-spacing: 1px;">View All Products</a>
-            </div>
-        }
-        else
-        {
-            @foreach (var item in Model.Products)
-            {
-                double rating = Model.ProductRatings.ContainsKey(item.ProductId) ? Model.ProductRatings[item.ProductId] : 5.0;
-                int reviewCount = Model.ProductReviewCounts.ContainsKey(item.ProductId) ? Model.ProductReviewCounts[item.ProductId] : 0;
-                bool isWishlisted = Model.UserWishlistProductIds.Contains(item.ProductId);
-
-                <div class="col-12 col-md-6 col-lg-4 d-flex">
-                    <div class="card w-100 border-0 shadow-sm text-white d-flex flex-column" style="background: #141721; border-top: 3px solid #dc3545 !important; border-radius: 8px;">
-                        
-                        <!-- Image Container -->
-                        <div class="position-relative text-center p-3 border-bottom" style="background: #0f1219; border-color: #242938 !important; min-height: 220px; display: flex; align-items: center; justify-content: center;">
-                            <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://via.placeholder.com/300/111/dc3545?text=Product" : item.ImageUrl)"
-                                 class="img-fluid" style="max-height: 180px; object-fit: contain;" alt="@item.Name"
-                                 onerror="this.src='https://via.placeholder.com/300/111/dc3545?text=Product';" />
-                            
-                            <span class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1 font-bebas" style="letter-spacing: 1px; font-size: 0.85rem;">
-                                @item.Category
-                            </span>
-
-                            <!-- Wishlist button (B7) -->
-                            @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Admin"))
-                            {
-                                <form asp-controller="Wishlist" asp-action="@(isWishlisted ? "Remove" : "Add")" method="post" class="position-absolute top-0 end-0 m-2">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                                    <button type="submit" class="btn btn-sm @(isWishlisted ? "btn-danger" : "btn-dark") border border-secondary px-2 py-1 font-montserrat" title="@(isWishlisted ? "Remove from wishlist" : "Add to wishlist")" style="font-size: 0.75rem;">
-                                        @(isWishlisted ? "[Saved]" : "[Wishlist]")
-                                    </button>
-                                </form>
-                            }
-                        </div>
-
-                        <!-- Card Body -->
-                        <div class="card-body p-3 d-flex flex-column flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h3 class="font-bebas text-white mb-0" style="font-size: 1.4rem; letter-spacing: 0.5px; line-height: 1.2;">
-                                    <a asp-action="Details" asp-route-id="@item.ProductId" class="text-white text-decoration-none">
-                                        @item.Name
-                                    </a>
-                                </h3>
-                            </div>
-
-                            <!-- Rating & Reviews (B3) -->
-                            <div class="d-flex align-items-center gap-2 mb-2 font-montserrat small">
-                                <span class="text-warning fw-bold">Rating: @rating.ToString("0.0") / 5</span>
-                                <span class="text-secondary">(@reviewCount reviews)</span>
-                            </div>
-
-                            <p class="font-montserrat text-secondary small flex-grow-1 mb-3" style="min-height: 40px;">
-                                @(string.IsNullOrEmpty(item.Description) ? "Engineered for maximum athletic performance." : (item.Description.Length > 90 ? item.Description.Substring(0, 90) + "..." : item.Description))
-                            </p>
-
-                            <!-- Price & Stock Availability (A1, A7) -->
-                            <div class="d-flex justify-content-between align-items-baseline pt-2 border-top mb-3" style="border-color: #242938 !important;">
-                                <div>
-                                    <span class="font-bebas text-danger fs-3" style="letter-spacing: 1px;">@item.Price.ToString("0.00")</span>
-                                    <span class="font-montserrat small text-secondary">LEI</span>
-                                </div>
-                                <div>
-                                    @if (item.StockQuantity > 0)
-                                    {
-                                        <span class="badge bg-success font-montserrat" style="font-size: 0.75rem;">In Stock (@item.StockQuantity left)</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary font-montserrat" style="font-size: 0.75rem;">Out of Stock</span>
-                                    }
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex gap-2">
-                                <a asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-outline-light font-bebas fs-5 flex-grow-1 py-1" style="letter-spacing: 1px;">
-                                    Details
-                                </a>
-
-                                @if (!User.IsInRole("Admin"))
-                                {
-                                    @if (User.Identity?.IsAuthenticated == true)
-                                    {
-                                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="flex-grow-1">
-                                            <input type="hidden" name="productId" value="@item.ProductId" />
-                                            <button type="submit" class="btn btn-danger font-bebas fs-5 w-100 py-1" @(item.StockQuantity <= 0 ? "disabled" : "") style="letter-spacing: 1px;">
-                                                Add to Cart
-                                            </button>
-                                        </form>
-                                    }
-                                    else
-                                    {
-                                        <a href="/Auth" class="btn btn-outline-danger font-bebas fs-5 flex-grow-1 py-1" style="letter-spacing: 1px;">
-                                            Log In
-                                        </a>
-                                    }
-                                }
-                                else
-                                {
-                                    <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-outline-warning font-bebas fs-5 py-1 px-3">Edit</a>
-                                    <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-outline-danger font-bebas fs-5 py-1 px-3">Delete</a>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-    </div>
-
-    <!-- Pagination Controls (A1: preserved in URL) -->
-    @if (Model.TotalPages > 1)
-    {
-        <div class="d-flex justify-content-center align-items-center gap-2 mt-5">
-            @if (Model.HasPreviousPage)
-            {
-                <a asp-action="Index"
-                   asp-route-page="@(Model.CurrentPage - 1)"
-                   asp-route-category="@Model.SelectedCategory"
-                   asp-route-search="@Model.SearchQuery"
-                   asp-route-minPrice="@Model.MinPrice"
-                   asp-route-maxPrice="@Model.MaxPrice"
-                   asp-route-inStock="@Model.InStockOnly"
-                   asp-route-sortBy="@Model.SortBy"
-                   class="btn btn-outline-secondary text-white font-bebas fs-5 px-3">
-                    Previous
-                </a>
-            }
-
-            @for (int i = 1; i <= Model.TotalPages; i++)
-            {
-                bool isCurrent = i == Model.CurrentPage;
-                <a asp-action="Index"
-                   asp-route-page="@i"
-                   asp-route-category="@Model.SelectedCategory"
-                   asp-route-search="@Model.SearchQuery"
-                   asp-route-minPrice="@Model.MinPrice"
-                   asp-route-maxPrice="@Model.MaxPrice"
-                   asp-route-inStock="@Model.InStockOnly"
-                   asp-route-sortBy="@Model.SortBy"
-                   class="btn @(isCurrent ? "btn-danger" : "btn-outline-secondary text-white") font-bebas fs-5 px-3">
-                    @i
-                </a>
-            }
-
-            @if (Model.HasNextPage)
-            {
-                <a asp-action="Index"
-                   asp-route-page="@(Model.CurrentPage + 1)"
-                   asp-route-category="@Model.SelectedCategory"
-                   asp-route-search="@Model.SearchQuery"
-                   asp-route-minPrice="@Model.MinPrice"
-                   asp-route-maxPrice="@Model.MaxPrice"
-                   asp-route-inStock="@Model.InStockOnly"
-                   asp-route-sortBy="@Model.SortBy"
-                   class="btn btn-outline-secondary text-white font-bebas fs-5 px-3">
-                    Next
-                </a>
-            }
-        </div>
-    }
 </div>
+
+@section Scripts {
+<script>
+    let liveSearchDebounceTimer = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('catalogSearchInput');
+        const form = document.getElementById('catalogFilterForm');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        const sortBySelect = document.getElementById('sortBySelect');
+        const inStockCheck = document.getElementById('inStockCheck');
+        const minPriceInput = document.getElementById('minPriceInput');
+        const maxPriceInput = document.getElementById('maxPriceInput');
+
+        // A2 Live AJAX Search as the user types (no Enter required)
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(liveSearchDebounceTimer);
+                showSearchBadge(true);
+                liveSearchDebounceTimer = setTimeout(function () {
+                    document.getElementById('currentPageInput').value = '1';
+                    performAjaxCatalogUpdate();
+                }, 220); // 220ms debounce for responsive instant feel
+            });
+        }
+
+        // Clear button clears search input and updates immediately
+        if (clearBtn && searchInput) {
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                searchInput.focus();
+                document.getElementById('currentPageInput').value = '1';
+                performAjaxCatalogUpdate();
+            });
+        }
+
+        // Live update on filter inputs change
+        [sortBySelect, inStockCheck, minPriceInput, maxPriceInput].forEach(elem => {
+            if (elem) {
+                elem.addEventListener('change', function () {
+                    clearTimeout(liveSearchDebounceTimer);
+                    document.getElementById('currentPageInput').value = '1';
+                    performAjaxCatalogUpdate();
+                });
+            }
+        });
+
+        // Intercept form submit so pressing Enter or clicking Filter button also triggers smooth AJAX
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearTimeout(liveSearchDebounceTimer);
+                document.getElementById('currentPageInput').value = '1';
+                performAjaxCatalogUpdate();
+            });
+        }
+    });
+
+    function showSearchBadge(show) {
+        const badge = document.getElementById('ajaxSearchBadge');
+        if (badge) {
+            badge.style.display = show ? 'inline-block' : 'none';
+        }
+    }
+
+    function selectCategory(event, catName) {
+        if (event) event.preventDefault();
+        const catInput = document.getElementById('selectedCategoryInput');
+        if (catInput) catInput.value = catName;
+
+        // Update pill active classes
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            if (pill.getAttribute('data-category').toLowerCase() === catName.toLowerCase()) {
+                pill.classList.remove('btn-outline-secondary', 'text-white');
+                pill.classList.add('btn-danger');
+            } else {
+                pill.classList.remove('btn-danger');
+                pill.classList.add('btn-outline-secondary', 'text-white');
+            }
+        });
+
+        document.getElementById('currentPageInput').value = '1';
+        performAjaxCatalogUpdate();
+    }
+
+    function navigatePage(pageNum) {
+        document.getElementById('currentPageInput').value = pageNum;
+        performAjaxCatalogUpdate();
+        // Smooth scroll up to product container
+        const target = document.getElementById('catalogFilterForm');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function resetAllFilters(event) {
+        if (event) event.preventDefault();
+        const searchInput = document.getElementById('catalogSearchInput');
+        const minPriceInput = document.getElementById('minPriceInput');
+        const maxPriceInput = document.getElementById('maxPriceInput');
+        const sortBySelect = document.getElementById('sortBySelect');
+        const inStockCheck = document.getElementById('inStockCheck');
+        const catInput = document.getElementById('selectedCategoryInput');
+        const pageInput = document.getElementById('currentPageInput');
+
+        if (searchInput) searchInput.value = '';
+        if (minPriceInput) minPriceInput.value = '';
+        if (maxPriceInput) maxPriceInput.value = '';
+        if (sortBySelect) sortBySelect.value = 'default';
+        if (inStockCheck) inStockCheck.checked = false;
+        if (catInput) catInput.value = 'All';
+        if (pageInput) pageInput.value = '1';
+
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            if (pill.getAttribute('data-category').toLowerCase() === 'all') {
+                pill.classList.remove('btn-outline-secondary', 'text-white');
+                pill.classList.add('btn-danger');
+            } else {
+                pill.classList.remove('btn-danger');
+                pill.classList.add('btn-outline-secondary', 'text-white');
+            }
+        });
+
+        performAjaxCatalogUpdate();
+    }
+
+    function performAjaxCatalogUpdate() {
+        const form = document.getElementById('catalogFilterForm');
+        const resultsArea = document.getElementById('catalogResultsArea');
+        if (!form || !resultsArea) return;
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        params.set('ajax', 'true');
+
+        resultsArea.style.opacity = '0.45';
+        resultsArea.style.transition = 'opacity 0.15s ease';
+
+        const requestUrl = '@Url.Action("Index", "Shop")?' + params.toString();
+
+        fetch(requestUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error during catalog AJAX fetch.');
+            return response.text();
+        })
+        .then(html => {
+            resultsArea.innerHTML = html;
+            resultsArea.style.opacity = '1';
+            showSearchBadge(false);
+
+            // B1: Maintain filter & search parameters in the browser URL without page refresh
+            params.delete('ajax');
+            const cleanUrl = window.location.pathname + '?' + params.toString();
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        })
+        .catch(err => {
+            console.error('AJAX Catalog update error:', err);
+            resultsArea.style.opacity = '1';
+            showSearchBadge(false);
+        });
+    }
+</script>
+}

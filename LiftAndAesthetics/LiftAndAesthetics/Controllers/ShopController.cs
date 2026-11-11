@@ -65,6 +65,12 @@ namespace LiftAndAesthetics.Controllers
                 pageSize: 12, // Max 24 per page (A1 acceptance criteria)
                 userEmail: userEmail);
 
+            // A2 & B1: Live AJAX search support without page reload
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Query.ContainsKey("ajax"))
+            {
+                return PartialView("_ProductGridPartial", catalogVm);
+            }
+
             return View(catalogVm);
         }
 

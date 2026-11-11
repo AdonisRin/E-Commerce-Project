@@ -45,7 +45,7 @@
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="p-4 rounded-3 h-100" style="background: #141721; border: 1px solid #323a4d; border-left: 4px solid #dc3545;">
                 <div class="font-montserrat small text-uppercase fw-bold mb-1" style="color: #94a3b8; letter-spacing: 0.5px;">Average Order Value (AOV)</div>
-                <div class="font-bebas text-danger display-6" style="letter-spacing: 1px;">@Model.AverageOrderValue.ToString("0.00") <span class="fs-6 text-white-50">LEI</span></div>
+                <div class="font-bebas display-6" style="letter-spacing: 1px; color: #ff5252;">@Model.AverageOrderValue.ToString("0.00") <span class="fs-6 text-white-50">LEI</span></div>
                 <div class="font-montserrat mt-2 fw-semibold" style="color: #cbd5e1; font-size: 0.85rem;">Revenue / total orders</div>
             </div>
         </div>
@@ -100,7 +100,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="font-bebas text-danger fs-5">
+                                <div class="font-bebas fs-5" style="color: #ff5252;">
                                     @tp.TotalSales.ToString("0.00") LEI
                                 </div>
                             </div>

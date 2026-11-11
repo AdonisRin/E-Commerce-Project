@@ -41,7 +41,7 @@
         <div class="table-responsive rounded shadow-sm" style="background: #141721; border: 1px solid #282e3e;">
             <table class="table table-dark table-hover mb-0 align-middle">
                 <thead style="background: #0f1219; border-bottom: 2px solid #dc3545;">
-                    <tr class="font-montserrat small text-uppercase text-secondary">
+                    <tr class="font-montserrat small text-uppercase" style="color: #cbd5e1;">
                         <th>Order #</th>
                         <th>Date</th>
                         <th>Customer</th>
@@ -67,26 +67,26 @@
                         <tr>
                             <td>
                                 <strong class="text-white font-bebas fs-5">@order.OrderNumber</strong>
-                                <div class="small text-secondary">@order.PaymentMethod</div>
+                                <div class="small" style="color: #cbd5e1;">@order.PaymentMethod</div>
                             </td>
                             <td class="small text-light">@order.OrderDate.ToString("dd MMM yyyy, HH:mm")</td>
                             <td>
                                 <div class="text-white fw-bold">@order.CustomerName</div>
-                                <div class="small text-secondary">@order.CustomerEmail</div>
-                                <div class="small text-secondary">@order.DeliveryCity, @order.DeliveryAddress</div>
+                                <div class="small" style="color: #cbd5e1;">@order.CustomerEmail</div>
+                                <div class="small" style="color: #94a3b8;">@order.DeliveryCity, @order.DeliveryAddress</div>
                             </td>
                             <td>
                                 <span class="badge bg-dark border border-secondary text-light">
                                     @order.OrderItems.Sum(i => i.Quantity) items
                                 </span>
-                                <div class="small text-secondary mt-1">
+                                <div class="small mt-1" style="color: #cbd5e1;">
                                     @foreach (var item in order.OrderItems.Take(2))
                                     {
                                         <div>@(item.Product?.Name ?? $"Item #{item.ProductId}") (x@(item.Quantity))</div>
                                     }
                                     @if (order.OrderItems.Count > 2)
                                     {
-                                        <div class="text-muted">+@(order.OrderItems.Count - 2) more...</div>
+                                        <div style="color: #94a3b8;">+@(order.OrderItems.Count - 2) more...</div>
                                     }
                                 </div>
                             </td>

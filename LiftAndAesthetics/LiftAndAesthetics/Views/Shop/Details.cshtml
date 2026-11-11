@@ -178,7 +178,7 @@
                 <h3 class="font-bebas text-white fs-2 mb-0 text-uppercase" style="letter-spacing: 1px;">
                     Customer Reviews (@Model.ReviewCount)
                 </h3>
-                <div class="text-secondary font-montserrat small">Average Rating: <strong>@Model.AverageRating.ToString("0.0")</strong> out of 5</div>
+                <div class="font-montserrat small" style="color: #cbd5e1;">Average Rating: <strong class="text-warning">@Model.AverageRating.ToString("0.0")</strong> out of 5</div>
             </div>
         </div>
 
@@ -187,7 +187,7 @@
         {
             <div class="p-4 rounded-3 mb-4" style="background: #141721; border: 1px solid #282e3e; border-left: 4px solid #28a745;">
                 <h4 class="font-bebas text-white fs-4 mb-2" style="letter-spacing: 1px;">Leave a Verified Review</h4>
-                <p class="font-montserrat small text-secondary mb-3">You purchased this product! Share your real workout and quality feedback with other lifters.</p>
+                <p class="font-montserrat small mb-3" style="color: #cbd5e1;">You purchased this product! Share your real workout and quality feedback with other lifters.</p>
 
                 <form asp-action="AddReview" method="post">
                     @Html.AntiForgeryToken()
@@ -219,7 +219,7 @@
         }
         else
         {
-            <div class="p-3 rounded-3 mb-4 font-montserrat small text-secondary" style="background: #10131a; border: 1px solid #242938;">
+            <div class="p-3 rounded-3 mb-4 font-montserrat small" style="background: #10131a; border: 1px solid #242938; color: #cbd5e1;">
                 <strong class="text-light">Verified Purchaser Policy:</strong> Only customers who have purchased and completed payment for this product can post a review. If you bought this product, log in with that account to leave your feedback.
             </div>
         }
@@ -227,7 +227,7 @@
         <!-- Reviews List -->
         @if (!Model.Reviews.Any())
         {
-            <div class="p-4 text-center rounded text-secondary font-montserrat small" style="background: #141721; border: 1px dashed #303749;">
+            <div class="p-4 text-center rounded font-montserrat small" style="background: #141721; border: 1px dashed #303749; color: #cbd5e1;">
                 No reviews yet for this product. Be the first customer to purchase and share your experience!
             </div>
         }

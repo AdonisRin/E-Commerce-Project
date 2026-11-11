@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LiftAndAesthetics.Models;
 using LiftAndAesthetics.Repositories.Interfaces;
@@ -12,6 +13,9 @@ namespace LiftAndAesthetics.Services
 {
     public class OrderService : IOrderService
     {
+        // A7 Concurrency Protection: Async Mutex ensuring race-condition-free stock checkout
+        private static readonly SemaphoreSlim _stockPaymentLock = new SemaphoreSlim(1, 1);
+
         private readonly IRepositoryWrapper _repository;
         private readonly IDiscountService _discountService;
         private readonly IEmailService _emailService;
@@ -120,89 +124,99 @@ namespace LiftAndAesthetics.Services
 
         public async Task<(bool Success, string Message)> ConfirmPaymentAsync(int orderId, string paymentMethod)
         {
-            var order = await _repository.Order.GetOrderByIdWithItemsAsync(orderId);
-            if (order == null) return (false, "Order not found.");
-
-            if (order.Status == "Paid" || order.Status == "Shipped" || order.Status == "Delivered")
-            {
-                return (true, "Order has already been confirmed and paid.");
-            }
-
-            if (order.Status == "Cancelled")
-            {
-                return (false, "Cannot process payment for a cancelled order.");
-            }
-
-            var member = await _repository.Member.GetByIdAsync(order.MemberId);
-            if (member == null) return (false, "Customer not found.");
-
-            // Concurrency check and stock deduction (A7)
-            foreach (var item in order.OrderItems)
-            {
-                var product = await _repository.Product.GetByIdAsync(item.ProductId);
-                if (product == null || product.StockQuantity < item.Quantity)
-                {
-                    order.Status = "Unpaid";
-                    _repository.Order.Update(order);
-                    await _repository.SaveAsync();
-                    return (false, $"Payment could not be completed: Product '{item.Product?.Name}' is out of stock.");
-                }
-            }
-
-            // If payment is via Wallet, check funds and deduct
-            if (paymentMethod == "Wallet")
-            {
-                if (member.WalletBalance < order.TotalAmount)
-                {
-                    order.Status = "Unpaid";
-                    _repository.Order.Update(order);
-                    await _repository.SaveAsync();
-                    return (false, $"Insufficient wallet balance ({member.WalletBalance:0.00} LEI). Total is {order.TotalAmount:0.00} LEI.");
-                }
-
-                member.WalletBalance -= order.TotalAmount;
-                _repository.Member.Update(member);
-            }
-
-            // Deduct stock for all items
-            foreach (var item in order.OrderItems)
-            {
-                var product = await _repository.Product.GetByIdAsync(item.ProductId);
-                if (product != null)
-                {
-                    product.StockQuantity -= item.Quantity;
-                    _repository.Product.Update(product);
-                }
-            }
-
-            // Update status and confirmation timestamp
-            order.Status = "Paid";
-            order.PaymentConfirmedAt = DateTime.Now;
-            order.PaymentMethod = paymentMethod;
-            _repository.Order.Update(order);
-
-            // Record promo code usage if applied
-            if (!string.IsNullOrEmpty(order.DiscountCode))
-            {
-                await _discountService.RecordUsageAsync(order.DiscountCode);
-            }
-
-            // Clear the user's cart
-            _repository.Cart.ClearCart(member.MemberId);
-
-            await _repository.SaveAsync();
-
-            // Send transactional email confirmation (B6)
+            // A7 Concurrency Protection: Mutex ensures two customers cannot purchase the last unit at the same time
+            await _stockPaymentLock.WaitAsync();
             try
             {
-                await _emailService.SendOrderConfirmationEmailAsync(order);
-            }
-            catch (Exception ex)
-            {
-                // Non-blocking: order remains paid even if SMTP host rejects email
-            }
+                var order = await _repository.Order.GetOrderByIdWithItemsAsync(orderId);
+                if (order == null) return (false, "Order not found.");
 
-            return (true, $"Payment confirmed! Order #{order.OrderNumber} is now marked as Paid.");
+                if (order.Status == "Paid" || order.Status == "Shipped" || order.Status == "Delivered")
+                {
+                    return (true, "Order has already been confirmed and paid.");
+                }
+
+                if (order.Status == "Cancelled")
+                {
+                    return (false, "Cannot process payment for a cancelled order.");
+                }
+
+                var member = await _repository.Member.GetByIdAsync(order.MemberId);
+                if (member == null) return (false, "Customer not found.");
+
+                // Concurrency check against fresh product stock (A7)
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await _repository.Product.GetByIdAsync(item.ProductId);
+                    if (product == null || product.StockQuantity < item.Quantity)
+                    {
+                        order.Status = "Unpaid";
+                        _repository.Order.Update(order);
+                        await _repository.SaveAsync();
+                        return (false, $"Payment could not be completed: Product '{item.Product?.Name ?? product?.Name ?? "Item"}' is out of stock (purchased by another customer).");
+                    }
+                }
+
+                // If payment is via Wallet, check funds and deduct
+                if (paymentMethod == "Wallet")
+                {
+                    if (member.WalletBalance < order.TotalAmount)
+                    {
+                        order.Status = "Unpaid";
+                        _repository.Order.Update(order);
+                        await _repository.SaveAsync();
+                        return (false, $"Insufficient wallet balance ({member.WalletBalance:0.00} LEI). Total is {order.TotalAmount:0.00} LEI.");
+                    }
+
+                    member.WalletBalance -= order.TotalAmount;
+                    _repository.Member.Update(member);
+                }
+
+                // Deduct stock for all items atomically
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await _repository.Product.GetByIdAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        product.StockQuantity -= item.Quantity;
+                        _repository.Product.Update(product);
+                    }
+                }
+
+                // Update status and confirmation timestamp
+                order.Status = "Paid";
+                order.PaymentConfirmedAt = DateTime.Now;
+                order.PaymentMethod = paymentMethod;
+                _repository.Order.Update(order);
+
+                // Record promo code usage if applied
+                if (!string.IsNullOrEmpty(order.DiscountCode))
+                {
+                    await _discountService.RecordUsageAsync(order.DiscountCode);
+                }
+
+                // Clear the user's cart
+                _repository.Cart.ClearCart(member.MemberId);
+
+                await _repository.SaveAsync();
+
+                // Send transactional email confirmation (B6)
+                try
+                {
+                    await _emailService.SendOrderConfirmationEmailAsync(order);
+                }
+                catch (Exception)
+                {
+                    // Non-blocking: order remains paid even if SMTP host rejects email
+                }
+
+                return (true, $"Payment confirmed! Order #{order.OrderNumber} is now marked as Paid.");
+            }
+            finally
+            {
+                // Always release the mutex so subsequent threads proceed without deadlocks or crashes
+                _stockPaymentLock.Release();
+            }
         }
 
         public async Task<(bool Success, string Message)> UpdateOrderStatusAsync(int orderId, string newStatus)
@@ -212,17 +226,25 @@ namespace LiftAndAesthetics.Services
 
             string oldStatus = order.Status;
 
-            // Stock restoration on cancellation (A7)
+            // Stock restoration on cancellation (A7) - protected by mutex
             if (newStatus == "Cancelled" && (oldStatus == "Paid" || oldStatus == "Shipped"))
             {
-                foreach (var item in order.OrderItems)
+                await _stockPaymentLock.WaitAsync();
+                try
                 {
-                    var product = await _repository.Product.GetByIdAsync(item.ProductId);
-                    if (product != null)
+                    foreach (var item in order.OrderItems)
                     {
-                        product.StockQuantity += item.Quantity;
-                        _repository.Product.Update(product);
+                        var product = await _repository.Product.GetByIdAsync(item.ProductId);
+                        if (product != null)
+                        {
+                            product.StockQuantity += item.Quantity;
+                            _repository.Product.Update(product);
+                        }
                     }
+                }
+                finally
+                {
+                    _stockPaymentLock.Release();
                 }
             }
             // If reactivating or manually setting to Paid from Unpaid/New, deduct stock

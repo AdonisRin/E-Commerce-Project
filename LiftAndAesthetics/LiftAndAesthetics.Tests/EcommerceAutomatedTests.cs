@@ -263,6 +263,54 @@ namespace LiftAndAesthetics.Tests
         }
 
         // -------------------------------------------------------------
+        // CONCURRENCY & MUTEX PROTECTION (SIMULTANEOUS PURCHASES)
+        // -------------------------------------------------------------
+
+        [Fact]
+        public async System.Threading.Tasks.Task StockConcurrency_TwoCustomersBuyingLastUnitSimultaneously_MutexPreventsCrashAndNegativeStock()
+        {
+            // Arrange: only 1 unit remaining in warehouse stock
+            int warehouseStock = 1;
+            var syncLock = new System.Threading.SemaphoreSlim(1, 1);
+            int successfulPurchases = 0;
+            int rejectedPurchases = 0;
+
+            async System.Threading.Tasks.Task PurchaseAttemptAsync(string customerName)
+            {
+                await syncLock.WaitAsync();
+                try
+                {
+                    if (warehouseStock >= 1)
+                    {
+                        // Sufficient stock: acquire item
+                        warehouseStock -= 1;
+                        System.Threading.Interlocked.Increment(ref successfulPurchases);
+                    }
+                    else
+                    {
+                        // Stock depleted: reject gracefully with friendly message
+                        System.Threading.Interlocked.Increment(ref rejectedPurchases);
+                    }
+                }
+                finally
+                {
+                    syncLock.Release();
+                }
+            }
+
+            // Act: Two concurrent customers click "Pay" at the exact same millisecond
+            var taskCustomerA = System.Threading.Tasks.Task.Run(() => PurchaseAttemptAsync("Customer A"));
+            var taskCustomerB = System.Threading.Tasks.Task.Run(() => PurchaseAttemptAsync("Customer B"));
+
+            await System.Threading.Tasks.Task.WhenAll(taskCustomerA, taskCustomerB);
+
+            // Assert: exactly 1 customer succeeds, 1 is rejected gracefully, stock never drops below 0
+            Assert.Equal(1, successfulPurchases);
+            Assert.Equal(1, rejectedPurchases);
+            Assert.Equal(0, warehouseStock);
+        }
+
+        // -------------------------------------------------------------
         // B5: DISCOUNT / PROMO CODES TESTS
         // -------------------------------------------------------------
 

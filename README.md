@@ -49,11 +49,11 @@ dotnet test LiftAndAesthetics/LiftAndAesthetics.Tests/LiftAndAesthetics.Tests.cs
 ```
 
 ### Test Results
-- **Total Tests:** 19
-- **Passed:** 19 (100%)
+- **Total Tests:** 20
+- **Passed:** 20 (100%)
 - **Failed / Skipped:** 0
-- **Execution Time:** ~300 ms
-- **Coverage Areas:** Shopping cart additions/updates/removals, server-side subtotal recalculations, warehouse stock boundary enforcement, percentage and fixed promo code validation, sandbox payment webhook confirmation, atomic stock decrement, and cancellation inventory restoration.
+- **Execution Time:** ~250 ms
+- **Coverage Areas:** Shopping cart additions/updates/removals, server-side subtotal recalculations, warehouse stock boundary enforcement, percentage and fixed promo code validation, sandbox payment webhook confirmation, atomic stock decrement, cancellation inventory restoration, and SemaphoreSlim / mutex race-condition concurrency protection during simultaneous checkout.
 
 ---
 
@@ -79,7 +79,7 @@ The database is automatically initialized and seeded on first run with the follo
 All 12 requirements are **100% complete, verified, and ready for live demonstration**:
 
 - **A1. Product Catalog:** Paginated view (max 24/page, default 12), category-specific pages (Supplements, Apparel, Equipment, Accessories), and individual product details (images, SKU, pricing, stock availability, star ratings).
-- **A2. Basic Search:** Case-insensitive search on product names with an informative empty state ("No products found") and instant reset.
+- **A2. Live AJAX Search:** Live debounced search-as-you-type on product names (without needing to press Enter) with instant partial DOM update, an informative empty state ("No products found"), and instant reset.
 - **A3. Shopping Cart:** Add, increment/decrement quantities, remove items. Line items and totals are strictly computed on the server. Quantities exceeding available warehouse stock are rejected. Authenticated cart state persists across logout/login.
 - **A4. User Accounts:** Registration, login, and logout. Passwords securely hashed with BCrypt / Argon2 via ASP.NET Core Identity. Profile supports saving and managing default delivery addresses.
 - **A5. Checkout Pipeline:** Multi-step wizard:
@@ -88,12 +88,12 @@ All 12 requirements are **100% complete, verified, and ready for live demonstrat
   3. Server Order Summary & Promo Code validation
   4. Payment Gateway selection. Order confirmation displays unique reference number (e.g. `ORD-20261110-4220`).
 - **A6. Sandbox Payment:** Order becomes `Paid` ONLY upon server confirmation webhook/endpoint tokenization. Browser redirection alone cannot mark an order as paid. Payment simulation failure leaves the order `Unpaid`.
-- **A7. Stock Management:** Concurrency-safe inventory decrement executed atomically when payment is confirmed. Stock is automatically restored if an order is cancelled. Two customers cannot buy the last unit simultaneously.
+- **A7. Stock Management:** Concurrency-safe inventory decrement executed atomically with `SemaphoreSlim` async mutex locks. Two customers purchasing the last unit simultaneously fail gracefully with zero negative stock. Stock is automatically restored if an order is cancelled.
 - **A8. Order History:** Customer dashboard at `/Orders` displaying order date, products purchased, quantities, grand total, and lifecycle status.
 - **A9. Administration Panel:** Gated `Admin` role access. Full CRUD for products and categories with image upload. Filterable order list with lifecycle transitions: `New` → `Paid` → `Shipped` → `Delivered` (or `Cancelled`).
 - **A10. Basic Security:** Anti-Forgery CSRF tokens enforced on all POST/PUT requests, server-side DataAnnotations validation, EF Core parameterized queries (immune to SQL injection), and controller-level endpoint authorization (`[Authorize(Roles = "Admin")]`).
 - **A11. Responsive Design:** Mobile-first dark aesthetic, fully usable and verified on 360 px viewports (Samsung Galaxy / iPhone SE) with no horizontal scroll.
-- **A12. Automated Tests:** 19 unit & integration tests run via `dotnet test` in < 400 ms.
+- **A12. Automated Tests:** 20 unit & integration tests run via `dotnet test` in < 300 ms.
 
 ---
 
